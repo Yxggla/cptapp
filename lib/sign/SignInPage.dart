@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cptapp/sign/SignUpPage.dart';
+import 'package:cptapp/auth_service.dart';
+import 'package:cptapp/home/HomePage.dart';
+
 class SignInPage extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +43,6 @@ class SignInPage extends StatelessWidget {
                   ),
                 ),
               ),
-
               Spacer(flex: 2),
               Padding(
                 padding: const EdgeInsets.only(left: 30.0, top: 20.0),
@@ -58,23 +63,22 @@ class SignInPage extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8, // 模糊半径
-                        offset: Offset(0, 2), // 阴影位置
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
                   child: TextField(
-                    style: TextStyle(
-                      fontSize: 16, // 字体大小
-                    ),
+                    controller: emailController,
+                    style: TextStyle(fontSize: 16),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      hintText: '输入你的邮箱或手机号', // 占位文本
-                      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20), // 内边距
+                      hintText: '输入你的邮箱或手机号',
+                      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none, // 无边框
+                        borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -82,13 +86,12 @@ class SignInPage extends StatelessWidget {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.blue, width: 2), // 聚焦时的边框样式
+                        borderSide: BorderSide(color: Colors.blue, width: 2),
                       ),
                     ),
                   ),
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.only(left: 30.0, top: 20.0),
                 child: Text(
@@ -108,24 +111,23 @@ class SignInPage extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8, // 模糊半径
-                        offset: Offset(0, 2), // 阴影位置
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
                   child: TextField(
+                    controller: passwordController,
                     obscureText: true,
-                    style: TextStyle(
-                      fontSize: 16, // 字体大小
-                    ),
+                    style: TextStyle(fontSize: 16),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      hintText: '请输入密码', // 占位文本
-                      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20), // 内边距
+                      hintText: '请输入密码',
+                      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none, // 无边框
+                        borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -133,17 +135,40 @@ class SignInPage extends StatelessWidget {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.blue, width: 2), // 聚焦时的边框样式
+                        borderSide: BorderSide(color: Colors.blue, width: 2),
                       ),
                     ),
                   ),
                 ),
               ),
-              Spacer(flex: 2), // 替代 SizedBox(height: 40)
+              Spacer(flex: 2),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    // 登录逻辑
+                  onPressed: () async {
+                    bool isLoggedIn = await AuthService.login(
+                      emailController.text,
+                      passwordController.text,
+                    );
+                    if (isLoggedIn) {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomePage()));
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('登录失败'),
+                          content: Text('用户名或密码错误'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text('关闭'),
+                              style: TextButton.styleFrom(
+                                primary: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   },
                   child: Text(
                     '登陆',
@@ -162,9 +187,9 @@ class SignInPage extends StatelessWidget {
                     ),
                     side: BorderSide(color: Colors.white, width: 1), // 边框颜色和宽度
                   ),
+
                 ),
               ),
-
               Spacer(flex: 1),
               Center(
                 child: TextButton(
@@ -181,9 +206,8 @@ class SignInPage extends StatelessWidget {
                               parent: animation,
                               curve: curve,
                             );
-
                             return FadeTransition(
-                              opacity: curvedAnimation, // 使用CurvedAnimation来应用曲线效果
+                              opacity: curvedAnimation,
                               child: child,
                             );
                           },
@@ -192,7 +216,6 @@ class SignInPage extends StatelessWidget {
                   child: Text(
                     "还没有账号？   注册",
                     style: TextStyle(color: Colors.white,fontSize: 16),
-                    // ... 文本样式
                   ),
                 ),
               ),

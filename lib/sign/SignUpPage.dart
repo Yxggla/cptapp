@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cptapp/sign/SignInPage.dart';
+import 'package:cptapp/auth_service.dart';
+
 class SignUpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

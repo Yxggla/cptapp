@@ -1,23 +1,33 @@
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
+  final String username;
+
+  HomePage({required this.username}); // 添加构造函数参数
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('首页'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center, // 将内容居中
+          children: <Widget>[
+            Icon(Icons.home), // 示例图标
+            SizedBox(width: 10), // 图标和文本之间的间隔
+            Text(
+              '$username',
+              style: TextStyle(color: Colors.black),
+            ),
+          ],
+        ),
         elevation: 0,
         backgroundColor: Colors.white,
         leading: Icon(Icons.menu, color: Colors.grey),
         actions: <Widget>[
           CircleAvatar(
-            backgroundImage: NetworkImage('你的图片链接'), // 这里替换为你的用户头像图片链接
+            // backgroundImage: NetworkImage('你的图片链接'), // 这里替换为你的用户头像图片链接
+            backgroundColor: Colors.blue,
           ),
           SizedBox(width: 20),
-          Text(
-            'username',
-            style: TextStyle(color: Colors.black),
-          ),
           SizedBox(width: 20),
         ],
       ),
@@ -63,6 +73,11 @@ class HomePage extends StatelessWidget {
             label: 'Search',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.crop_free),
+            // 使用摄像头图标代表 "扫一扫"
+            label: 'Scan',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.assignment),
             label: 'Reports',
           ),
@@ -71,6 +86,11 @@ class HomePage extends StatelessWidget {
             label: 'Profile',
           ),
         ],
+        backgroundColor: Colors.blue,
+        type: BottomNavigationBarType.fixed, // 当有四个以上的项时需要设置为 fixed
+        selectedItemColor: Colors.white, // 设置选中项的颜色
+        unselectedItemColor: Colors.white70, // 设置未选中项的颜色
+        showUnselectedLabels: true, // 是否显示未选中项的标签
         // 此处你可以添加逻辑以处理点击事件
       ),
     );

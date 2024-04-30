@@ -150,7 +150,7 @@ class SignInPage extends StatelessWidget {
                       passwordController.text,
                     );
                     if (isLoggedIn) {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomePage()));
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomePage(username: emailController.text)));
                     } else {
                       showDialog(
                         context: context,

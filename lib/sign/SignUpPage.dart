@@ -3,6 +3,10 @@ import 'package:cptapp/sign/SignInPage.dart';
 import 'package:cptapp/auth_service.dart';
 
 class SignUpPage extends StatelessWidget {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,176 +44,58 @@ class SignUpPage extends StatelessWidget {
                 ),
               ),
               Spacer(flex: 2),
-              Padding(
-                padding: const EdgeInsets.only(left: 30.0, top: 20.0),
-                child: Text(
-                  '用户名',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16,),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8, // 模糊半径
-                        offset: Offset(0, 2), // 阴影位置
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    style: TextStyle(
-                      fontSize: 16, // 字体大小
-                    ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: '请输入你的用户名', // 占位文本
-                      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20), // 内边距
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none, // 无边框
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.blue, width: 2), // 聚焦时的边框样式
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 30.0, top: 20.0),
-                child: Text(
-                  '邮箱地址',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16,),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8, // 模糊半径
-                        offset: Offset(0, 2), // 阴影位置
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    style: TextStyle(
-                      fontSize: 16, // 字体大小
-                    ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: '请输入邮箱地址', // 占位文本
-                      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20), // 内边距
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none, // 无边框
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.blue, width: 2), // 聚焦时的边框样式
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 30.0, top: 20.0),
-                child: Text(
-                  '密码',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16,),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8, // 模糊半径
-                        offset: Offset(0, 2), // 阴影位置
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    obscureText: true,
-                    style: TextStyle(
-                      fontSize: 16, // 字体大小
-                    ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: '请输入密码', // 占位文本
-                      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20), // 内边距
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none, // 无边框
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.blue, width: 2), // 聚焦时的边框样式
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              buildTextField("用户名", _usernameController),
+              buildTextField("邮箱地址", _emailController),
+              buildPasswordField("密码", _passwordController),
               Spacer(flex: 2), // 替代 SizedBox(height: 40)
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-
+                  onPressed: () async {
+                    bool registered = await AuthService.register(
+                      _usernameController.text,
+                      _emailController.text,
+                      _passwordController.text,
+                    );
+                    if (registered) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignInPage()),
+                      );
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('注册失败'),
+                          content: Text('参数有问题'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text('关闭'),
+                              style: TextButton.styleFrom(
+                                primary: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   },
                   child: Text(
                     '注册',
                     style: TextStyle(
-                      fontSize: 18, // 字体大小
-                      fontWeight: FontWeight.bold, // 字体粗细
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.blue, // 按钮背景颜色
-                    onPrimary: Colors.white, // 按钮文字颜色
-                    elevation: 5, // 阴影高度
-                    padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18), // 按钮内边距
-                    shape: RoundedRectangleBorder( // 形状
-                      borderRadius: BorderRadius.circular(15), // 圆角边框
+                    primary: Colors.blue,
+                    onPrimary: Colors.white,
+                    elevation: 5,
+                    padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    side: BorderSide(color: Colors.white, width: 1), // 边框颜色和宽度
+                    side: BorderSide(color: Colors.white, width: 1),
                   ),
                 ),
               ),
@@ -219,34 +105,141 @@ class SignUpPage extends StatelessWidget {
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (context, animation, secondaryAnimation) =>
-                              SignInPage(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            var curve = Curves.easeIn;
-                            var curvedAnimation = CurvedAnimation(
-                              parent: animation,
-                              curve: curve,
-                            );
-
-                            return FadeTransition(
-                              opacity: curvedAnimation, // 使用CurvedAnimation来应用曲线效果
-                              child: child,
-                            );
-                          },
-                        ));
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            SignInPage(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
+                      ),
+                    );
                   },
                   child: Text(
                     "已有账号了？   登陆",
-                    style: TextStyle(color: Colors.white,fontSize: 16),
-                    // ... 文本样式
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
               ),
               Spacer(flex: 5),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildTextField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 30.0, top: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 16),
+          Padding(
+            padding: EdgeInsets.only(left: 0, right: 30, top: 0),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: controller,
+                style: TextStyle(fontSize: 16),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: '请输入$label',
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildPasswordField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 30.0, top: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 16),
+          Padding(
+            padding: EdgeInsets.only(left: 0, right: 30, top: 0),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: controller,
+                obscureText: true,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: '请输入$label',
+                  contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:cptapp/sign/SignInPage.dart';
 class HomePage extends StatelessWidget {
   final String username;
 
@@ -9,10 +9,8 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center, // 将内容居中
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(Icons.home), // 示例图标
-            SizedBox(width: 10), // 图标和文本之间的间隔
             Text(
               '$username',
               style: TextStyle(color: Colors.black),
@@ -21,16 +19,79 @@ class HomePage extends StatelessWidget {
         ),
         elevation: 0,
         backgroundColor: Colors.white,
-        leading: Icon(Icons.menu, color: Colors.grey),
+        leading: Builder(  // 使用Builder来获得正确的context
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu, color: Colors.grey),
+            onPressed: () => Scaffold.of(context).openDrawer(), // 现在使用的是正确的context
+          ),
+        ),
         actions: <Widget>[
           CircleAvatar(
-            // backgroundImage: NetworkImage('你的图片链接'), // 这里替换为你的用户头像图片链接
             backgroundColor: Colors.blue,
           ),
           SizedBox(width: 20),
-          SizedBox(width: 20),
         ],
       ),
+
+    drawer: ClipRRect(
+    borderRadius: BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)), // 设置右上和右下角的圆角
+      child: Drawer(
+        backgroundColor: Colors.blue,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    width: double.infinity,
+                    height: 80, // 设置图片的高度
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage("img/MyHomePage/logo1@3x.png"), // 使用 AssetImage
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    '$username',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _buildDrawerItem(Icons.home, '首页', context, () {
+              Navigator.pop(context); // 只关闭抽屉
+            }),
+            _buildDrawerItem(Icons.account_balance, '财务管理', context, () {
+              Navigator.pop(context); // 关闭抽屉
+            }),
+            _buildDrawerItem(Icons.account_balance_wallet, '预算管理', context, () {
+              Navigator.pop(context); // 先关闭抽屉
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage())); // 然后跳转到预算管理页面
+            }),
+            _buildDrawerItem(Icons.assignment, '报表生成', context, () {
+              Navigator.pop(context); // 先关闭抽屉
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage())); // 然后跳转到预算管理页面
+            }),
+            _buildDrawerItem(Icons.settings, '设置', context, () {
+              Navigator.pop(context); // 先关闭抽屉
+            }),
+
+            // 添加更多的列表项...
+          ],
+        ),
+      ),
+
+    ),
+
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -53,7 +114,7 @@ class HomePage extends StatelessWidget {
                 crossAxisCount: 2,
                 children: <Widget>[
                   _buildMenuItem(Icons.account_balance, '财务管理'),
-                  _buildMenuItem(Icons.home, '预约管理'),
+                  _buildMenuItem(Icons.account_balance_wallet, '预算管理'),
                   _buildMenuItem(Icons.assignment, '报表生成'),
                   // 添加更多按钮
                 ],
@@ -111,3 +172,19 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+
+Widget _buildDrawerItem(IconData icon, String title, BuildContext context, VoidCallback onTap) {
+  return Padding(
+    padding: EdgeInsets.symmetric(vertical: 8.0,horizontal: 10), // 控制上下间隔
+    child: ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(
+        title,
+        style: TextStyle(color: Colors.white, fontSize: 20),
+      ),
+      onTap: onTap,
+      tileColor: Colors.blue,
+    ),
+  );
+}
+

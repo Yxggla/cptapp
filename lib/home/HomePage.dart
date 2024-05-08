@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cptapp/sign/SignInPage.dart';
+import 'yusuanguanli/ysgl_main.dart';
+import 'caiwuguanli/cwgl_main.dart';
+import 'baobiaoshengcheng/bbsc_main.dart';
 class HomePage extends StatelessWidget {
   final String username;
 
@@ -13,7 +16,7 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             Text(
               '$username',
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(color: Colors.black,fontSize:22),
             ),
           ],
         ),
@@ -67,6 +70,7 @@ class HomePage extends StatelessWidget {
                 ],
               ),
             ),
+            SizedBox(height: 50),
             _buildDrawerItem(Icons.home, '首页', context, () {
               Navigator.pop(context); // 只关闭抽屉
             }),
@@ -96,26 +100,18 @@ class HomePage extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            TextField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Search',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
             SizedBox(height: 20),
             Expanded(
               child: GridView.count(
-                crossAxisCount: 2,
+                crossAxisCount: 1,
+                childAspectRatio: 2,
                 children: <Widget>[
-                  _buildMenuItem(Icons.account_balance, '财务管理'),
-                  _buildMenuItem(Icons.account_balance_wallet, '预算管理'),
-                  _buildMenuItem(Icons.assignment, '报表生成'),
+                  _buildMenuItem(Icons.account_balance, '财务管理',() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => cwgl_mainPage(username: username)));}),
+                  _buildMenuItem(Icons.account_balance_wallet, '预算管理',() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ysgl_mainPage()));}),
+                  _buildMenuItem(Icons.assignment, '报表生成',() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => bbsc_mainPage()));}),
                   // 添加更多按钮
                 ],
               ),
@@ -157,16 +153,20 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String label) {
-    return Card(
-      elevation: 2.0,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(icon, size: 50),
-            Text(label),
-          ],
+  Widget _buildMenuItem(IconData icon, String label,VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 2.0,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(icon, size: 60),
+              SizedBox(height: 10),
+              Text(label, style: TextStyle(fontSize: 18)),
+            ],
+          ),
         ),
       ),
     );

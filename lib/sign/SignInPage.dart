@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cptapp/sign/SignUpPage.dart';
 import 'package:cptapp/auth_service.dart';
-import 'package:cptapp/home/HomePage.dart';
+import 'package:cptapp/home/HomeCwgl.dart';
 
 class SignInPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -47,7 +47,7 @@ class SignInPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 30.0, top: 20.0),
                 child: Text(
-                  '邮箱或手机号',
+                  '邮箱或用户名',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 26,

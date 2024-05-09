@@ -3,6 +3,9 @@ import 'package:cptapp/sign/SignInPage.dart';
 import 'yusuanguanli/ysgl_main.dart';
 import 'package:cptapp/classdata.dart';
 import 'baobiaoshengcheng/bbsc_main.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cptapp/cameraclass.dart';
+
 class HomePage extends StatefulWidget {
   final String username;
 
@@ -17,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   bool _isSearching = false;
   final FocusNode _focusNode = FocusNode();
   int _contentMode = 0;  // 默认模式
+  final CameraService _cameraService = CameraService();
 
 
   @override
@@ -39,7 +43,7 @@ class _HomePageState extends State<HomePage> {
         break;
       case 1:
         content.addAll([
-          Text('信息录入页面的内容')
+          _buildLuru()
         ]);
         break;
       case 2:
@@ -146,24 +150,7 @@ class _HomePageState extends State<HomePage> {
       ),
 
     ),
-
-      // body: ListView(
-      //   children: <Widget>[
-      //     _buildHeader(widget.username),
-      //     _buildMenuGrid(),
-      //     _buildSearchBox(),
-      //   ] + mockFinanceData.map((item) => _buildFinanceItem(
-      //     item.title,
-      //     item.context,
-      //     item.amount,
-      //     item.startDate,
-      //     item.endDate,
-      //     item.baoxiao,
-      //   )).toList(),
-      // ),
       body:  ListView(children: content),
-
-
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -344,6 +331,106 @@ class _HomePageState extends State<HomePage> {
           },
         )
 
+    );
+  }
+
+  Widget _buildLuru() {
+    return Container(
+      padding: EdgeInsets.all(20),
+      margin:EdgeInsets.symmetric(horizontal: 24.0,vertical: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: Offset(0, 3),  // changes position of shadow
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center, // 水平方向上居中分布
+            children: [
+              Spacer(flex: 2,),
+              Text("账单录入", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              Spacer(), // 自动扩展的空间，推动后面的元素向右
+              Column(
+                mainAxisSize: MainAxisSize.min, // 让 Column 紧缩包裹其内容
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.camera_alt), // 使用相机图标
+                    iconSize: 30, // 设置图标大小
+                    onPressed: () {
+                      _cameraService.takePicture();
+                    },
+                  ),
+                  Text("扫描添加", style: TextStyle(fontSize: 12)),
+                ],
+              ),
+              SizedBox(width: 10,), // 确保右边有一定边距
+            ],
+          ),
+          SizedBox(height: 8),
+          _buildTextField("名称"),
+          _buildTextField("类别"),// 重构的文本输入框
+          _buildTextField("日期"),
+          _buildTextField("金额"),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {},
+            child: Text("保存"),
+            style: ElevatedButton.styleFrom(
+              primary: Colors.blue,  // 按钮颜色
+              onPrimary: Colors.white,  // 文字颜色
+              minimumSize: Size(double.infinity, 50), // 按钮大小，宽度充满容器
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildTextField(String label) {
+    return Container(
+      margin:EdgeInsets.symmetric(horizontal: 30.0,vertical: 4.0),
+      padding: EdgeInsets.only(bottom: 10), // 在每个文本输入框下方增加间距
+      child: Row(
+        children: [
+          Expanded(
+            flex: 1, // 标签占用可用空间的比例
+            child: Text(label+":", style: TextStyle(fontSize: 18, color: Colors.black54)),
+          ),
+          Expanded(
+            flex: 3, // 输入框占用可用空间的比例
+            child: TextField(
+              style: TextStyle(fontSize: 16, color: Colors.black87), // 设置文本样式
+              decoration: InputDecoration(
+                hintStyle: TextStyle(color: Colors.grey), // 提示文本的样式
+                border: OutlineInputBorder( // 定义边框
+                  borderSide: BorderSide(color: Colors.blueAccent, width: 1.5),
+                  borderRadius: BorderRadius.circular(8), // 边框圆角
+                ),
+                enabledBorder: OutlineInputBorder( // 未选中时的边框样式
+                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                focusedBorder: OutlineInputBorder( // 聚焦时的边框样式
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.symmetric(vertical:16,horizontal: 12),
+              ),
+            ),
+
+          ),
+        ],
+      ),
     );
   }
 

@@ -246,7 +246,7 @@ class _HomePageState extends State<HomePage> {
       crossAxisSpacing: 10, // 横向间隔
       mainAxisSpacing: 10, // 纵向间隔
       childAspectRatio: 1, // 调整子元素宽高比
-      padding: EdgeInsets.symmetric(horizontal: 20.0,vertical: 10.0),
+      padding: EdgeInsets.symmetric(horizontal: 14.0,vertical: 10.0),
       children: <Widget>[
         _buildMenuItem(Icons.receipt, '账单记录',0),
         _buildMenuItem(Icons.edit, '账单录入',1),
@@ -282,7 +282,7 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             Icon(icon, size: 28),
             SizedBox(height: 8),
-            Text(label, style: TextStyle(fontSize: 14)),
+            Text(label, style: TextStyle(fontSize: 13)),
           ],
         ),
       ),

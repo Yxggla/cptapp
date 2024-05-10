@@ -670,7 +670,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10), // 调整下拉框的内边距
+                      padding: EdgeInsets.symmetric(horizontal: 4), // 调整下拉框的内边距
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
                       ),

@@ -47,7 +47,7 @@ class SignInPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 30.0, top: 20.0),
                 child: Text(
-                  '邮箱或用户名',
+                  '手机号',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 26,
@@ -74,7 +74,7 @@ class SignInPage extends StatelessWidget {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      hintText: '输入你的邮箱或手机号',
+                      hintText: '输入你的手机号',
                       contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),

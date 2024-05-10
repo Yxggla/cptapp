@@ -83,9 +83,6 @@ class _HomePageState extends State<HomePage> {
               .toList(),
         ]);
         break;
-      case 3:
-        content.addAll([Text('其他页面内容')]);
-        break;
     }
     return Scaffold(
       appBar: AppBar(
@@ -270,19 +267,18 @@ class _HomePageState extends State<HomePage> {
     return GridView.count(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
-      crossAxisCount: 4,
-      crossAxisSpacing: 10,
+      crossAxisCount: 3,
+      crossAxisSpacing: 20,
       // 横向间隔
       mainAxisSpacing: 10,
       // 纵向间隔
       childAspectRatio: 1,
       // 调整子元素宽高比
-      padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       children: <Widget>[
         _buildMenuItem(Icons.receipt, '账单记录', 0),
         _buildMenuItem(Icons.edit, '账单录入', 1),
         _buildMenuItem(Icons.category, '账单分类', 2),
-        _buildMenuItem(Icons.bar_chart, '账单统计', 3),
       ],
     );
   }
@@ -295,7 +291,7 @@ class _HomePageState extends State<HomePage> {
         });
       },
       child: Container(
-        padding: EdgeInsets.all(16), // 设置内部边距
+        padding: EdgeInsets.all(26), // 设置内部边距
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20), // 设置圆角
@@ -313,13 +309,13 @@ class _HomePageState extends State<HomePage> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Icon(icon,
-                size: 28,
+                size: 30,
                 color: _contentMode == index ? Colors.blue : Colors.black),
             // 图标颜色也进行区分
             SizedBox(height: 8),
             Text(label,
                 style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: _contentMode == index ? Colors.blue : Colors.black)),
           ],
         ),

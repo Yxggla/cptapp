@@ -15,53 +15,76 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-
 class _HomePageState extends State<HomePage> {
   bool _isSearching = false;
   final FocusNode _focusNode = FocusNode();
-  int _contentMode = 0;  // 默认模式
+  int _contentMode = 0; // 默认模式
   final CameraService _cameraService = CameraService();
+  String _currentFilter = '全部'; // Default filter
+  List<FinanceItem> _filteredFinanceData = []; // List to hold filtered data
+  double _currentMinAmount = 0.0;
+  double _currentMaxAmount = 10000.0; // You can set this based on your data
+  TextEditingController _minAmountController = TextEditingController();
+  TextEditingController _maxAmountController = TextEditingController();
+  List<String> filterOptions = [];
+  String _selectedReimbursement = '全部';
 
+  @override
+  void initState() {
+    super.initState();
+    _filterFinanceData2(); // Initial filter setup
+    filterOptions = generateFilterOptions(mockFinanceData);
+  }
+
+  List<String> generateFilterOptions(List<FinanceItem> data) {
+    // 使用 Set 来获取所有独特的 context 值
+    var uniqueContexts = data.map((item) => item.context).toSet();
+    // 将 Set 转换为 List，并添加一个 '全部' 选项
+    return ['全部', ...uniqueContexts];
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> content = [_buildHeader(widget.username),  // 通用头部
-       _buildMenuGrid()   ];
+    List<Widget> content = [
+      _buildHeader(widget.username), // 通用头部
+      _buildMenuGrid()
+    ];
     switch (_contentMode) {
       case 0:
         content.addAll([
           _buildSearchBox(),
-          ...mockFinanceData.map((item) => _buildFinanceItem(
-            item.title,
-            item.context,
-            item.amount,
-            item.startDate,
-            item.endDate,
-            item.baoxiao,
-          )).toList(),  // 使用扩展运算符...来正确展开列表
+          ...mockFinanceData
+              .map((item) => _buildFinanceItem(
+                    item.title,
+                    item.context,
+                    item.amount,
+                    item.startDate,
+                    item.endDate,
+                    item.baoxiao,
+                  ))
+              .toList(), // 使用扩展运算符...来正确展开列表
         ]);
         break;
       case 1:
-        content.addAll([
-          _buildLuru()
-        ]);
+        content.addAll([_buildLuru()]);
         break;
       case 2:
         content.addAll([
-          ...mockFinanceData.map((item) => _buildFinanceItem(
-            item.title,
-            item.context,
-            item.amount,
-            item.startDate,
-            item.endDate,
-            item.baoxiao,
-          )).toList(),  // 使用扩展运算符...来正确展开列表
+          _buildFilters_Select(),
+          ..._filteredFinanceData
+              .map((item) => _buildFinanceItem(
+                    item.title,
+                    item.context,
+                    item.amount,
+                    item.startDate,
+                    item.endDate,
+                    item.baoxiao,
+                  ))
+              .toList(),
         ]);
         break;
       case 3:
-        content.addAll([
-          Text('其他页面内容')
-        ]);
+        content.addAll([Text('其他页面内容')]);
         break;
     }
     return Scaffold(
@@ -71,16 +94,18 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             Text(
               '财务管理',
-              style: TextStyle(color: Colors.black,fontSize:22),
+              style: TextStyle(color: Colors.black, fontSize: 22),
             ),
           ],
         ),
         elevation: 0,
         backgroundColor: Colors.white,
-        leading: Builder(  // 使用Builder来获得正确的context
+        leading: Builder(
+          // 使用Builder来获得正确的context
           builder: (context) => IconButton(
             icon: Icon(Icons.menu, color: Colors.grey),
-            onPressed: () => Scaffold.of(context).openDrawer(), // 现在使用的是正确的context
+            onPressed: () =>
+                Scaffold.of(context).openDrawer(), // 现在使用的是正确的context
           ),
         ),
         actions: <Widget>[
@@ -90,67 +115,75 @@ class _HomePageState extends State<HomePage> {
           SizedBox(width: 20),
         ],
       ),
-
-    drawer: ClipRRect(
-    borderRadius: BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)), // 设置右上和右下角的圆角
-      child: Drawer(
-        backgroundColor: Colors.blue,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    width: double.infinity,
-                    height: 80, // 设置图片的高度
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage("img/MyHomePage/logo1@3x.png"), // 使用 AssetImage
+      drawer: ClipRRect(
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
+        // 设置右上和右下角的圆角
+        child: Drawer(
+          backgroundColor: Colors.blue,
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      width: double.infinity,
+                      height: 80, // 设置图片的高度
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(
+                              "img/MyHomePage/logo1@3x.png"), // 使用 AssetImage
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    '${widget.username}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
+                    SizedBox(height: 20),
+                    Text(
+                      '${widget.username}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 50),
-            _buildDrawerItem(Icons.home, '首页', context, () {
-              Navigator.pop(context); // 只关闭抽屉
-            }),
-            _buildDrawerItem(Icons.account_balance, '财务管理', context, () {
-              Navigator.pop(context); // 关闭抽屉
-            }),
-            _buildDrawerItem(Icons.account_balance_wallet, '预算管理', context, () {
-              Navigator.pop(context); // 先关闭抽屉
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage())); // 然后跳转到预算管理页面
-            }),
-            _buildDrawerItem(Icons.assignment, '报表生成', context, () {
-              Navigator.pop(context); // 先关闭抽屉
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SignInPage())); // 然后跳转到预算管理页面
-            }),
-            _buildDrawerItem(Icons.settings, '设置', context, () {
-              Navigator.pop(context); // 先关闭抽屉
-            }),
+              SizedBox(height: 50),
+              _buildDrawerItem(Icons.home, '首页', context, () {
+                Navigator.pop(context); // 只关闭抽屉
+              }),
+              _buildDrawerItem(Icons.account_balance, '财务管理', context, () {
+                Navigator.pop(context); // 关闭抽屉
+              }),
+              _buildDrawerItem(Icons.account_balance_wallet, '预算管理', context,
+                  () {
+                Navigator.pop(context); // 先关闭抽屉
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SignInPage())); // 然后跳转到预算管理页面
+              }),
+              _buildDrawerItem(Icons.assignment, '报表生成', context, () {
+                Navigator.pop(context); // 先关闭抽屉
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SignInPage())); // 然后跳转到预算管理页面
+              }),
+              _buildDrawerItem(Icons.settings, '设置', context, () {
+                Navigator.pop(context); // 先关闭抽屉
+              }),
 
-            // 添加更多的列表项...
-          ],
+              // 添加更多的列表项...
+            ],
+          ),
         ),
       ),
-
-    ),
-      body:  ListView(children: content),
+      body: ListView(children: content),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -172,9 +205,12 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         backgroundColor: Colors.white,
-        type: BottomNavigationBarType.fixed, // 当有四个以上的项时需要设置为 fixed
-        selectedItemColor: Colors.blue, // 设置选中项的颜色
-        unselectedItemColor: Colors.black, // 设置未选中项的颜色
+        type: BottomNavigationBarType.fixed,
+        // 当有四个以上的项时需要设置为 fixed
+        selectedItemColor: Colors.blue,
+        // 设置选中项的颜色
+        unselectedItemColor: Colors.black,
+        // 设置未选中项的颜色
         showUnselectedLabels: true, // 是否显示未选中项的标签
         // 此处你可以添加逻辑以处理点击事件
       ),
@@ -183,14 +219,14 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildSearchBox() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0,horizontal: 16), // 控制上下间隔
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16), // 控制上下间隔
       child: TextField(
         decoration: InputDecoration(
-          labelText: '搜索',  // 显示搜索标签
-          hintText: '输入搜索的账单...',  // 提示文本
-          prefixIcon: Icon(Icons.search),  // 前置图标
+          labelText: '搜索', // 显示搜索标签
+          hintText: '输入搜索的账单...', // 提示文本
+          prefixIcon: Icon(Icons.search), // 前置图标
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25.0),  // 边框圆角
+            borderRadius: BorderRadius.circular(25.0), // 边框圆角
           ),
         ),
         onChanged: (value) {
@@ -199,9 +235,11 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  Widget _buildDrawerItem(IconData icon, String title, BuildContext context, VoidCallback onTap) {
+
+  Widget _buildDrawerItem(
+      IconData icon, String title, BuildContext context, VoidCallback onTap) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0,horizontal: 10), // 控制上下间隔
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 10), // 控制上下间隔
       child: ListTile(
         leading: Icon(icon, color: Colors.white),
         title: Text(
@@ -213,81 +251,97 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
   Widget _buildHeader(String username) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 16.0),  // 设置左右边距为16.0
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      // 设置左右边距为16.0
       child: ListTile(
         title: Text(
           'hi ${username}',
           style: TextStyle(fontSize: 50),
         ),
-        subtitle: Text('管理你的账单',style: TextStyle(fontSize: 18)),
+        subtitle: Text('管理你的账单', style: TextStyle(fontSize: 18)),
       ),
     );
   }
+
   Widget _buildMenuGrid() {
     return GridView.count(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       crossAxisCount: 4,
-      crossAxisSpacing: 10, // 横向间隔
-      mainAxisSpacing: 10, // 纵向间隔
-      childAspectRatio: 1, // 调整子元素宽高比
-      padding: EdgeInsets.symmetric(horizontal: 14.0,vertical: 10.0),
+      crossAxisSpacing: 10,
+      // 横向间隔
+      mainAxisSpacing: 10,
+      // 纵向间隔
+      childAspectRatio: 1,
+      // 调整子元素宽高比
+      padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
       children: <Widget>[
-        _buildMenuItem(Icons.receipt, '账单记录',0),
-        _buildMenuItem(Icons.edit, '账单录入',1),
-        _buildMenuItem(Icons.category, '账单分类',2),
-        _buildMenuItem(Icons.bar_chart, '账单统计',3),
+        _buildMenuItem(Icons.receipt, '账单记录', 0),
+        _buildMenuItem(Icons.edit, '账单录入', 1),
+        _buildMenuItem(Icons.category, '账单分类', 2),
+        _buildMenuItem(Icons.bar_chart, '账单统计', 3),
       ],
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String label,int  index) {
+  Widget _buildMenuItem(IconData icon, String label, int index) {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _contentMode = index;  // 根据索引切换模式
+          _contentMode = index; // 根据索引切换模式
         });
       },
       child: Container(
-        padding: EdgeInsets.all(16),// 设置内部边距
+        padding: EdgeInsets.all(16), // 设置内部边距
         decoration: BoxDecoration(
-          color: Colors.white,  // 设置背景色，可以根据你的需要进行更改
-          borderRadius: BorderRadius.circular(20),  // 设置圆角
-          boxShadow: [  // 可选，添加阴影效果
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20), // 设置圆角
+          boxShadow: [
+            // 可选，添加阴影效果
             BoxShadow(
               color: Colors.grey.withOpacity(0.2),
               spreadRadius: 1,
               blurRadius: 6,
-              offset: Offset(0, 3),  // changes position of shadow
+              offset: Offset(0, 3), // changes position of shadow
             ),
           ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(icon, size: 28),
+            Icon(icon,
+                size: 28,
+                color: _contentMode == index ? Colors.blue : Colors.black),
+            // 图标颜色也进行区分
             SizedBox(height: 8),
-            Text(label, style: TextStyle(fontSize: 13)),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 13,
+                    color: _contentMode == index ? Colors.blue : Colors.black)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFinanceItem(String title,String context, int amount, String startDate, String endDate,bool baoxiao) {
+  Widget _buildFinanceItem(String title, String context, int amount,
+      String startDate, String endDate, bool baoxiao) {
     return Container(
-        margin:  EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),  // 外边距，为容器与其他元素提供间隔
+        margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+        // 外边距，为容器与其他元素提供间隔
         decoration: BoxDecoration(
-          color: Colors.white,  // 背景色
-          borderRadius: BorderRadius.circular(16),  // 圆角
-          boxShadow: [  // 阴影效果
+          color: Colors.white, // 背景色
+          borderRadius: BorderRadius.circular(16), // 圆角
+          boxShadow: [
+            // 阴影效果
             BoxShadow(
-              color: Colors.grey.withOpacity(0.5),  // 阴影颜色
-              spreadRadius: 2,  // 阴影扩展程度
-              blurRadius: 4,  // 模糊值
-              offset: Offset(0, 2),  // X,Y轴偏移
+              color: Colors.grey.withOpacity(0.5), // 阴影颜色
+              spreadRadius: 2, // 阴影扩展程度
+              blurRadius: 4, // 模糊值
+              offset: Offset(0, 2), // X,Y轴偏移
             ),
           ],
         ),
@@ -304,22 +358,26 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text('类型: $context', style: TextStyle(fontSize: 16)),  // 注意这里应该显示类型而不是重复标题
-              Text('金额: ¥$amount', style: TextStyle(fontSize: 16, color: Colors.green)),
-              Text('日期: $startDate - $endDate', style: TextStyle(fontSize: 14, color: Colors.grey)),
+              Text('类型: $context', style: TextStyle(fontSize: 16)),
+              // 注意这里应该显示类型而不是重复标题
+              Text('金额: ¥$amount',
+                  style: TextStyle(fontSize: 16, color: Colors.green)),
+              Text('日期: $startDate - $endDate',
+                  style: TextStyle(fontSize: 14, color: Colors.grey)),
             ],
           ),
           trailing: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Icon(
-                baoxiao ? Icons.check_circle : Icons.cancel,  // 根据baoxiao变量选择图标
-                color: baoxiao ? Colors.green : Colors.red,  // 根据baoxiao变量选择颜色
+                baoxiao ? Icons.check_circle : Icons.cancel, // 根据baoxiao变量选择图标
+                color: baoxiao ? Colors.green : Colors.red, // 根据baoxiao变量选择颜色
               ),
               Text(
-                baoxiao ? '已报销' : '未报销',  // 根据baoxiao变量选择文本
+                baoxiao ? '已报销' : '未报销', // 根据baoxiao变量选择文本
                 style: TextStyle(
-                  color: baoxiao ? Colors.green : Colors.red,  // 根据baoxiao变量选择文本颜色
+                  color: baoxiao ? Colors.green : Colors.red,
+                  // 根据baoxiao变量选择文本颜色
                   fontSize: 14,
                 ),
               ),
@@ -329,15 +387,13 @@ class _HomePageState extends State<HomePage> {
           onTap: () {
             // 点击事件
           },
-        )
-
-    );
+        ));
   }
 
   Widget _buildLuru() {
     return Container(
       padding: EdgeInsets.all(20),
-      margin:EdgeInsets.symmetric(horizontal: 24.0,vertical: 12.0),
+      margin: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -346,7 +402,7 @@ class _HomePageState extends State<HomePage> {
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 5,
             blurRadius: 7,
-            offset: Offset(0, 3),  // changes position of shadow
+            offset: Offset(0, 3), // changes position of shadow
           ),
         ],
       ),
@@ -356,8 +412,11 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center, // 水平方向上居中分布
             children: [
-              Spacer(flex: 2,),
-              Text("账单录入", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              Spacer(
+                flex: 2,
+              ),
+              Text("账单录入",
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
               Spacer(), // 自动扩展的空间，推动后面的元素向右
               Column(
                 mainAxisSize: MainAxisSize.min, // 让 Column 紧缩包裹其内容
@@ -372,12 +431,14 @@ class _HomePageState extends State<HomePage> {
                   Text("扫描添加", style: TextStyle(fontSize: 12)),
                 ],
               ),
-              SizedBox(width: 10,), // 确保右边有一定边距
+              SizedBox(
+                width: 10,
+              ), // 确保右边有一定边距
             ],
           ),
           SizedBox(height: 8),
           _buildTextField("名称"),
-          _buildTextField("类别"),// 重构的文本输入框
+          _buildTextField("类别"), // 重构的文本输入框
           _buildTextField("日期"),
           _buildTextField("金额"),
           SizedBox(height: 20),
@@ -385,8 +446,8 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {},
             child: Text("保存"),
             style: ElevatedButton.styleFrom(
-              primary: Colors.blue,  // 按钮颜色
-              onPrimary: Colors.white,  // 文字颜色
+              primary: Colors.blue, // 按钮颜色
+              onPrimary: Colors.white, // 文字颜色
               minimumSize: Size(double.infinity, 50), // 按钮大小，宽度充满容器
             ),
           ),
@@ -394,56 +455,258 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
   Widget _buildTextField(String label) {
     return Container(
-      margin:EdgeInsets.symmetric(horizontal: 30.0,vertical: 4.0),
+      margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 4.0),
       padding: EdgeInsets.only(bottom: 10), // 在每个文本输入框下方增加间距
       child: Row(
         children: [
           Expanded(
             flex: 1, // 标签占用可用空间的比例
-            child: Text(label+":", style: TextStyle(fontSize: 18, color: Colors.black54)),
+            child: Text(label + ":",
+                style: TextStyle(fontSize: 18, color: Colors.black54)),
           ),
           Expanded(
             flex: 3, // 输入框占用可用空间的比例
             child: TextField(
               style: TextStyle(fontSize: 16, color: Colors.black87), // 设置文本样式
               decoration: InputDecoration(
-                hintStyle: TextStyle(color: Colors.grey), // 提示文本的样式
-                border: OutlineInputBorder( // 定义边框
+                hintStyle: TextStyle(color: Colors.grey),
+                // 提示文本的样式
+                border: OutlineInputBorder(
+                  // 定义边框
                   borderSide: BorderSide(color: Colors.blueAccent, width: 1.5),
                   borderRadius: BorderRadius.circular(8), // 边框圆角
                 ),
-                enabledBorder: OutlineInputBorder( // 未选中时的边框样式
-                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+                enabledBorder: OutlineInputBorder(
+                  // 未选中时的边框样式
+                  borderSide:
+                      BorderSide(color: Colors.grey.shade400, width: 1.0),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                focusedBorder: OutlineInputBorder( // 聚焦时的边框样式
+                focusedBorder: OutlineInputBorder(
+                  // 聚焦时的边框样式
                   borderSide: BorderSide(color: Colors.blue, width: 2.0),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(vertical:16,horizontal: 12),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 16, horizontal: 12),
               ),
             ),
-
           ),
         ],
       ),
     );
   }
 
+  Widget _buildFilterDropdown() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      decoration: BoxDecoration(
+        color: Colors.white, // Background color of the dropdown button
+        borderRadius: BorderRadius.circular(14), // Rounded corners
+        border: Border.all(
+            color: Colors.blueAccent, width: 2), // Border color and width
+      ),
+      child: DropdownButtonHideUnderline(
+        // Hide the default underline of a dropdown
+        child: DropdownButton<String>(
+          value: _currentFilter,
+          icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
+          // Dropdown icon and color
+          iconSize: 24,
+          // Icon size
+          elevation: 16,
+          style: TextStyle(color: Colors.blue, fontSize: 16),
+          // Text style
+          onChanged: (String? newValue) {
+            setState(() {
+              _currentFilter = newValue!;
+              _filterFinanceData2();
+            });
+          },
+          items: filterOptions.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          dropdownColor: Colors.white, // Dropdown menu background color
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAmountFilter() {
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: TextField(
+              controller: _minAmountController,
+              decoration: InputDecoration(
+                labelText: '最小金额',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14.0),
+                ),
+                suffixText: '元',
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              ),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                _filterFinanceData2(); // Optionally update filter upon each edit
+              },
+            ),
+          ),
+        ),
+        Expanded(
+          child: TextField(
+            controller: _maxAmountController,
+            decoration: InputDecoration(
+              labelText: '最大金额',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14.0),
+              ),
+              suffixText: '元',
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+            ),
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              _filterFinanceData2(); // Optionally update filter upon each edit
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReimbursementFilter() {
+    List<String> reimbursementOptions = ['全部', '已报销', '未报销'];
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      decoration: BoxDecoration(
+        color: Colors.white, // Background color of the dropdown button
+        borderRadius: BorderRadius.circular(14), // Rounded corners
+        border: Border.all(
+            color: Colors.blueAccent, width: 2), // Border color and width
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedReimbursement,
+          icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
+          iconSize: 24,
+          elevation: 16,
+          style: TextStyle(color: Colors.blue, fontSize: 16),
+          // Text style
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedReimbursement = newValue!;
+              _filterFinanceData2(); // 更新筛选逻辑
+            });
+          },
+          items: reimbursementOptions
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  void _filterFinanceData2() {
+    double minAmount = double.tryParse(_minAmountController.text) ?? 0;
+    double maxAmount =
+        double.tryParse(_maxAmountController.text) ?? double.infinity;
+
+    _filteredFinanceData = mockFinanceData.where((item) {
+      bool matchesType =
+          _currentFilter == '全部' || item.context == _currentFilter;
+      bool matchesAmount = item.amount >= minAmount && item.amount <= maxAmount;
+      bool matchesReimbursement = true; // 默认为 true，适用于 '全部' 选项
+
+      if (_selectedReimbursement == '已报销') {
+        matchesReimbursement = item.baoxiao == true;
+      } else if (_selectedReimbursement == '未报销') {
+        matchesReimbursement = item.baoxiao == false;
+      }
+
+      return matchesType && matchesAmount && matchesReimbursement;
+    }).toList();
+
+    setState(() {});
+  }
+
+  Widget _buildFilters_Select() {
+    return Container(
+      padding: EdgeInsets.all(10), // 增加外边距
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10, bottom: 5),
+                  // 添加适当的内边距以美化布局
+                  child: Text(
+                    '类型', // 标签文本
+                    style: TextStyle(
+                      fontSize: 16, // 字体大小
+                      fontWeight: FontWeight.bold, // 字体加粗
+                      color: Colors.black, // 字体颜色
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 0), // 调整下拉框的内边距
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: _buildFilterDropdown(),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            // 添加是否报销的筛选
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 0, bottom: 5),
+                  // 添加适当的内边距以美化布局
+                  child: Text(
+                    '是否报销', // 标签文本
+                    style: TextStyle(
+                      fontSize: 16, // 字体大小
+                      fontWeight: FontWeight.bold, // 字体加粗
+                      color: Colors.black, // 字体颜色
+                    ),
+                  ),
+                ),
+                _buildReimbursementFilter(), // 是否报销筛选
+              ],
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildAmountFilter(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-

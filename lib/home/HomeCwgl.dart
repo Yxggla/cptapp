@@ -58,8 +58,7 @@ class _HomePageState extends State<HomePage> {
                     item.title,
                     item.context,
                     item.amount,
-                    item.startDate,
-                    item.endDate,
+                    item.Date,
                     item.baoxiao,
                   ))
               .toList(), // 使用扩展运算符...来正确展开列表
@@ -76,8 +75,7 @@ class _HomePageState extends State<HomePage> {
                     item.title,
                     item.context,
                     item.amount,
-                    item.startDate,
-                    item.endDate,
+                    item.Date,
                     item.baoxiao,
                   ))
               .toList(),
@@ -324,7 +322,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFinanceItem(String title, String context, int amount,
-      String startDate, String endDate, bool baoxiao) {
+      String Date, bool baoxiao) {
     return Container(
         margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
         // 外边距，为容器与其他元素提供间隔
@@ -358,7 +356,7 @@ class _HomePageState extends State<HomePage> {
               // 注意这里应该显示类型而不是重复标题
               Text('金额: ¥$amount',
                   style: TextStyle(fontSize: 16, color: Colors.green)),
-              Text('日期: $startDate - $endDate',
+              Text('日期: $Date',
                   style: TextStyle(fontSize: 14, color: Colors.grey)),
             ],
           ),
@@ -435,7 +433,6 @@ class _HomePageState extends State<HomePage> {
           SizedBox(height: 8),
           _buildTextField("名称"),
           _buildTextField("类别"), // 重构的文本输入框
-          _buildTextField("日期"),
           _buildTextField("金额"),
           SizedBox(height: 20),
           ElevatedButton(

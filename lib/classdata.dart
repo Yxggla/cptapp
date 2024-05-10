@@ -21,4 +21,5 @@ List<FinanceItem> mockFinanceData = [
   FinanceItem(title: '火车票', context: '交通', amount: 800, startDate: '2024-1-5', endDate: '2024-3', baoxiao: false),
   FinanceItem(title: '酒店费', context: '住宿', amount: 1500, startDate: '2024-1-3', endDate: '2024-3', baoxiao: true),
   FinanceItem(title: '请老板吃饭钱', context: '餐饮', amount: 8500, startDate: '2024-1-3', endDate: '2024-3', baoxiao: true),
+  FinanceItem(title: '报销的电话费', context: '电话费', amount: 8500, startDate: '2024-1-3', endDate: '2024-3', baoxiao: false),
 ];

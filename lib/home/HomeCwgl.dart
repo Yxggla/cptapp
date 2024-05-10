@@ -504,7 +504,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildFilterDropdown() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      padding: const EdgeInsets.only(left: 26, right: 26.0),
       decoration: BoxDecoration(
         color: Colors.white, // Background color of the dropdown button
         borderRadius: BorderRadius.circular(14), // Rounded corners
@@ -516,12 +516,9 @@ class _HomePageState extends State<HomePage> {
         child: DropdownButton<String>(
           value: _currentFilter,
           icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
-          // Dropdown icon and color
           iconSize: 24,
-          // Icon size
           elevation: 16,
           style: TextStyle(color: Colors.blue, fontSize: 16),
-          // Text style
           onChanged: (String? newValue) {
             setState(() {
               _currentFilter = newValue!;
@@ -535,6 +532,42 @@ class _HomePageState extends State<HomePage> {
             );
           }).toList(),
           dropdownColor: Colors.white, // Dropdown menu background color
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReimbursementFilter() {
+    List<String> reimbursementOptions = ['全部', '已报销', '未报销'];
+    return Container(
+      padding: const EdgeInsets.only(left: 26, right: 26.0),
+      decoration: BoxDecoration(
+        color: Colors.white, // Background color of the dropdown button
+        borderRadius: BorderRadius.circular(14), // Rounded corners
+        border: Border.all(
+            color: Colors.blueAccent, width: 2), // Border color and width
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedReimbursement,
+          icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
+          iconSize: 24,
+          elevation: 16,
+          style: TextStyle(color: Colors.blue, fontSize: 16),
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedReimbursement = newValue!;
+              _filterFinanceData2(); // 更新筛选逻辑
+            });
+          },
+          items: reimbursementOptions
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          dropdownColor: Colors.white,
         ),
       ),
     );
@@ -555,7 +588,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 suffixText: '元',
                 contentPadding:
-                    EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                    EdgeInsets.symmetric(vertical: 16, horizontal: 14),
               ),
               keyboardType: TextInputType.number,
               onChanged: (value) {
@@ -565,60 +598,27 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         Expanded(
-          child: TextField(
-            controller: _maxAmountController,
-            decoration: InputDecoration(
-              labelText: '最大金额',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14.0),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: TextField(
+              controller: _maxAmountController,
+              decoration: InputDecoration(
+                labelText: '最大金额',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14.0),
+                ),
+                suffixText: '元',
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 16, horizontal: 14),
               ),
-              suffixText: '元',
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                _filterFinanceData2(); // Optionally update filter upon each edit
+              },
             ),
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              _filterFinanceData2(); // Optionally update filter upon each edit
-            },
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildReimbursementFilter() {
-    List<String> reimbursementOptions = ['全部', '已报销', '未报销'];
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-      decoration: BoxDecoration(
-        color: Colors.white, // Background color of the dropdown button
-        borderRadius: BorderRadius.circular(14), // Rounded corners
-        border: Border.all(
-            color: Colors.blueAccent, width: 2), // Border color and width
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedReimbursement,
-          icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
-          iconSize: 24,
-          elevation: 16,
-          style: TextStyle(color: Colors.blue, fontSize: 16),
-          // Text style
-          onChanged: (String? newValue) {
-            setState(() {
-              _selectedReimbursement = newValue!;
-              _filterFinanceData2(); // 更新筛选逻辑
-            });
-          },
-          items: reimbursementOptions
-              .map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-        ),
-      ),
     );
   }
 
@@ -648,62 +648,72 @@ class _HomePageState extends State<HomePage> {
   Widget _buildFilters_Select() {
     return Container(
       padding: EdgeInsets.all(10), // 增加外边距
-      child: Row(
+      child: Column(
+        // 纵向布局，将两个部分分开
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10, bottom: 5),
-                  // 添加适当的内边距以美化布局
-                  child: Text(
-                    '类型', // 标签文本
-                    style: TextStyle(
-                      fontSize: 16, // 字体大小
-                      fontWeight: FontWeight.bold, // 字体加粗
-                      color: Colors.black, // 字体颜色
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start, // 使 Row 中的内容居中对齐
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 18, bottom: 5),
+                      child: Text(
+                        '类型', // 标签文本
+                        style: TextStyle(
+                          fontSize: 16, // 字体大小
+                          fontWeight: FontWeight.bold, // 字体加粗
+                          color: Colors.black, // 字体颜色
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 0), // 调整下拉框的内边距
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: _buildFilterDropdown(),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            // 添加是否报销的筛选
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 0, bottom: 5),
-                  // 添加适当的内边距以美化布局
-                  child: Text(
-                    '是否报销', // 标签文本
-                    style: TextStyle(
-                      fontSize: 16, // 字体大小
-                      fontWeight: FontWeight.bold, // 字体加粗
-                      color: Colors.black, // 字体颜色
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10), // 调整下拉框的内边距
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: _buildFilterDropdown(),
                     ),
-                  ),
+                  ],
                 ),
-                _buildReimbursementFilter(), // 是否报销筛选
-              ],
-            ),
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center, // 垂直居中对齐
+                  crossAxisAlignment: CrossAxisAlignment.start, // 文本保持左对齐
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, bottom: 5),
+                      child: Text(
+                        '是否报销', // 标签文本
+                        style: TextStyle(
+                          fontSize: 16, // 字体大小
+                          fontWeight: FontWeight.bold, // 字体加粗
+                          color: Colors.black, // 字体颜色
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 0), // 调整下拉框的内边距
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: _buildReimbursementFilter(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAmountFilter(),
-              ],
-            ),
+          SizedBox(
+            height: 8,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10, left: 4, right: 4),
+            // 为下一个元素提供顶部间距
+            child: _buildAmountFilter(), // 第二行，单独的元素
           ),
         ],
       ),

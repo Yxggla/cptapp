@@ -186,6 +186,26 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
           ),
           SizedBox(height: 20),
           Text('预算:先写死吧$moneyyear',style: TextStyle(fontSize: 28),),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              // 在这里添加按钮点击后的行为
+            },
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(Colors.blue), // 设置按钮背景色
+              foregroundColor: MaterialStateProperty.all(Colors.white), // 设置文字颜色
+              elevation: MaterialStateProperty.all(8), // 设置阴影
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0), // 设置按钮的圆角
+                    side: BorderSide(color: Colors.blue), // 设置边框颜色
+                  )
+              ),
+              padding: MaterialStateProperty.all(EdgeInsets.all(16)), // 设置内边距
+            ),
+            child: Text('申请预算调整',style: TextStyle(fontSize: 22),),
+          ),
+          SizedBox(height: 20),
         ],
       ),
     );

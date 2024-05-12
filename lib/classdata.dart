@@ -21,3 +21,15 @@ List<FinanceItem> mockFinanceData = [
   FinanceItem(title: '请老板吃饭钱', context: '餐饮', amount: 8500, Date: '2024-4', baoxiao: true),
   FinanceItem(title: '报销的电话费', context: '电话费', amount: 200, Date: '2024-3', baoxiao: false),
 ];
+
+class UserItem{
+  final String username;
+  final String phone;
+
+  UserItem({
+    required this.username,
+    required this.phone,
+  });
+}
+
+

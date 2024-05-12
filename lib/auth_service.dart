@@ -1,4 +1,7 @@
 // auth_service.dart
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AuthService {
   //登陆
@@ -19,5 +22,28 @@ class AuthService {
       return true; // 注册成功
     }
     return false; // 注册失败
+  }
+}
+
+
+
+
+class User with ChangeNotifier {
+  String username;
+  String phone;
+
+  User({required this.username, required this.phone});
+
+  Future<void> fetchAndSetUser() async {
+    final response = await http.get(Uri.parse('https://your-api-url.com/login'));
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      username = data['username'];
+      phone = data['phone'];
+      notifyListeners();
+    } else {
+      throw Exception('Failed to load user data');
+    }
   }
 }

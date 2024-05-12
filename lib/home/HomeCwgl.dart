@@ -8,11 +8,12 @@ import 'package:cptapp/cameraclass.dart';
 import 'yusuanguanli/ysgl_main.dart';
 import 'yusuanguanli/ysgl_main_admin.dart';
 import 'baobiaoshengcheng/bbsc_main.dart';
+import 'package:dio/dio.dart';
+import 'package:cptapp/dio_client.dart';
+import 'package:cptapp/providerGL.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
-  final String username;
-
-  HomePage({required this.username});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -35,12 +36,17 @@ class _HomePageState extends State<HomePage> {
   final List<String> _categories = ['类别1', '类别2', '类别3', '类别4']; // 可选的类别列表
   int _selectedIndex_bottom = 0;
   final List<String> _titles = ['财务管理', '预算管理', '报表生成', '我的信息'];
+  String? username;
+
 
   @override
   void initState() {
     super.initState();
     _filterFinanceData2(); // Initial filter setup
     filterOptions = generateFilterOptions(mockFinanceData);
+    Provider.of<UserNotifier>(context, listen: false).fetchUsername().catchError((error) {
+      print("Error: $error");
+    });
   }
 
   List<String> generateFilterOptions(List<FinanceItem> data) {
@@ -51,7 +57,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
+    final username = Provider.of<UserNotifier>(context).username;
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -108,7 +114,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     SizedBox(height: 20),
                     Text(
-                      '${widget.username}',
+                      '$username',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
@@ -219,14 +225,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildHeader(String username) {
+  Widget _buildHeader() {
+    final username = Provider.of<UserNotifier>(context).username;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       // 设置左右边距为16.0
       child: ListTile(
         title: Text(
-          'hi ${username}',
-          style: TextStyle(fontSize: 50),
+          'hi $username',
+          style: TextStyle(fontSize: 60),
         ),
         subtitle: Text('管理你的账单', style: TextStyle(fontSize: 18)),
       ),
@@ -751,7 +758,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildContentForIndex0() {
     List<Widget> content = [
-      _buildHeader(widget.username), // 通用头部
+      _buildHeader(), // 通用头部
       _buildMenuGrid()
     ];
     switch (_contentMode) {

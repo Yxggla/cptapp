@@ -4,7 +4,7 @@ import 'package:cptapp/auth_service.dart';
 import 'package:cptapp/home/HomeCwgl.dart';
 
 class SignInPage extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   @override
@@ -69,7 +69,7 @@ class SignInPage extends StatelessWidget {
                     ],
                   ),
                   child: TextField(
-                    controller: emailController,
+                    controller: phoneController,
                     style: TextStyle(fontSize: 16),
                     decoration: InputDecoration(
                       filled: true,
@@ -146,11 +146,11 @@ class SignInPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     bool isLoggedIn = await AuthService.login(
-                      emailController.text,
+                      phoneController.text,
                       passwordController.text,
                     );
                     if (isLoggedIn) {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomePage(username: emailController.text)));
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomePage()));
                     } else {
                       showDialog(
                         context: context,

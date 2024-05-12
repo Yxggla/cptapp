@@ -4,7 +4,7 @@ import 'package:cptapp/auth_service.dart';
 
 class SignUpPage extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   @override
@@ -45,7 +45,7 @@ class SignUpPage extends StatelessWidget {
               ),
               Spacer(flex: 2),
               buildTextField("用户名", _usernameController),
-              buildTextField("邮箱地址", _emailController),
+              buildTextField("手机号", _phoneController),
               buildPasswordField("密码", _passwordController),
               Spacer(flex: 2), // 替代 SizedBox(height: 40)
               Center(
@@ -53,7 +53,7 @@ class SignUpPage extends StatelessWidget {
                   onPressed: () async {
                     bool registered = await AuthService.register(
                       _usernameController.text,
-                      _emailController.text,
+                      _phoneController.text,
                       _passwordController.text,
                     );
                     if (registered) {

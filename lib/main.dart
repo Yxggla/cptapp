@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cptapp/SecondPage.dart'; // 确保这个路径匹配你的文件结构
+import 'package:provider/provider.dart';
+import 'providerGL.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider(
+      create: (context) => UserNotifier(),
+      child: MaterialApp(
+        home: MyHomePage(),
       ),
-      home: MyHomePage(),
     );
   }
 }

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cptapp/home/HomeCwgl.dart';
+import 'package:dio/dio.dart';
+import 'package:cptapp/dio_client.dart';
+import 'package:cptapp/providerGL.dart';
+import 'package:provider/provider.dart';
 
 class ysgl_mainPage extends StatefulWidget {
   const ysgl_mainPage({Key? key}) : super(key: key);
@@ -32,13 +36,14 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
 
 
   Widget _buildHeader() {
+    final username = Provider.of<UserNotifier>(context).username;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       // 设置左右边距为16.0
       child: ListTile(
         title: Text(
-          'hi 写死先',
-          style: TextStyle(fontSize: 50),
+          'hi $username',
+          style: TextStyle(fontSize: 60),
         ),
         subtitle: Text('管理你的预算', style: TextStyle(fontSize: 18)),
       ),

@@ -2,48 +2,63 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'savelingpai.dart';
+import 'dio_client.dart';
+import 'package:dio/dio.dart';
 
 class AuthService {
   //登陆
-  static Future<bool> login(String username, String password) async {
+  static Future<bool> login(String phone, String password) async {
+    DioClient dioClient = DioClient();
+    var url = '/user/login';
+    var formData = FormData.fromMap({
+      'phone': phone,
+      'password': password,
+    });
+    print("Request URL: ${dioClient.dio.options.baseUrl}$url");
 
-    await Future.delayed(Duration(seconds: 1)); // 模拟网络延迟
-    if (username == 'admin' && password == '123') {
-      return true; // 登录成功
+    try {
+      var response = await dioClient.dio.post(url, data: formData);
+      if (response.statusCode == 200) {
+        var data = response.data;
+        return data['success'];
+      } else {
+        print('登录失败: ${response.data}');
+        return false;
+      }
+    } catch (e) {
+      print('登录异常: $e');
+      return false;
     }
-    return false; // 登录失败
   }
+
+
   //注册
-  static Future<bool> register(String username, String email, String password) async {
-    await Future.delayed(Duration(seconds: 1)); // 模拟网络延迟
-
-    // 这里只是一个简单的示例验证
-    if (username.isNotEmpty && email.contains('@') && password.length >= 3) {
-      return true; // 注册成功
+  static Future<bool> register(String username, String phone, String password) async {
+    var url = Uri.parse('http://121.43.138.158:8080/api/v1/user/register');
+    try {
+      var response = await http.post(url, body: {
+        'username': username,
+        'password': password,
+        'phone': phone,
+      });
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        return data['success']; // 假设成功标识为'success'
+      } else {
+        print('注册失败: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('注册错误: $e');
+      return false;
     }
-    return false; // 注册失败
   }
+
+
+
 }
 
 
 
 
-class User with ChangeNotifier {
-  String username;
-  String phone;
-
-  User({required this.username, required this.phone});
-
-  Future<void> fetchAndSetUser() async {
-    final response = await http.get(Uri.parse('https://your-api-url.com/login'));
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-      username = data['username'];
-      phone = data['phone'];
-      notifyListeners();
-    } else {
-      throw Exception('Failed to load user data');
-    }
-  }
-}

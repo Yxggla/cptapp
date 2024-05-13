@@ -12,35 +12,43 @@ class UserPagePage extends StatefulWidget {
 }
 
 class _UserPagePageState extends State<UserPagePage> {
-  final TextEditingController _usernameController = TextEditingController();
+  int _contentMode = 0;
+  final TextEditingController _newUsernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   DioClient _dioClient = DioClient();
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserNotifier>(context, listen: false).fetchUsername();
-    });
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     Provider.of<UserNotifier>(context, listen: false).fetchUsername();
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
+      // body: ListView(
+        // children: <Widget>[
+
+        //   _buildLogoutButton(),
+        // ],
+      //),
+      body: Column(
         children: <Widget>[
-          _buildHeader(),
-          Padding(
-            padding: EdgeInsets.only(left: 16, right: 0, top: 10, bottom: 16),
-            // 这里设定了所有方向的外边距为16像素
-            child: Text(
-              '修改你的用户信息',
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          Expanded(
+            child: ListView(
+              // Your other widgets here
+              children: <Widget>[
+                _buildHeader(),
+                SizedBox(height: 20,),
+                _buildSelect(),
+                _contentMode == 0 ? _buildUserName() : _buildUserPassword(),
+              ],
             ),
           ),
-          _buildUserCard(),
-          _buildLogoutButton(),
+          _buildLogoutButton(),  // This will always be at the bottom
         ],
       ),
     );
@@ -60,92 +68,317 @@ class _UserPagePageState extends State<UserPagePage> {
       ),
     );
   }
-  Widget _buildUserCard() {
+
+  Widget _buildSelect(){
+    return GridView.count(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 12, // 横向间隔
+      mainAxisSpacing: 10, // 纵向间隔
+      childAspectRatio: 1.8, // 调整子元素宽高比
+      padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+      children: <Widget>[
+        _buildButton('修改用户名', Icons.person, 0),
+        _buildButton('修改密码', Icons.lock, 1),
+      ],
+    );
+  }
+
+  Widget _buildButton(String text, IconData icon, int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _contentMode = index;
+          _clear();// 根据索引切换模式
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.all(22), // 设置内部边距
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20), // 设置圆角
+          boxShadow: [
+            // 可选，添加阴影效果
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 6,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(icon,
+                size: 24,
+                color: _contentMode == index ? Colors.blue : Colors.black),
+            // 图标颜色也进行区分
+            SizedBox(height: 8),
+            Text(text,
+                style: TextStyle(
+                    fontSize: 16,
+                    color: _contentMode == index ? Colors.blue : Colors.black)),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildUserName() {
     return Padding(
-      padding: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 16),
+      padding: EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 16),
       child: Form(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            TextFormField(
-              controller: _usernameController,
-              decoration: InputDecoration(
-                labelText: '新用户名',
-                border: OutlineInputBorder(),
+            Padding(
+              padding:
+                  EdgeInsets.only(left: 40, right: 40, top: 20, bottom: 10),
+              child: TextFormField(
+                controller: _newUsernameController,
+                obscureText: true,
+                style: TextStyle(fontSize: 16), // 调整字体大小
+                decoration: InputDecoration(
+                  labelText: '你的新用户名',
+                  hintText: '输入你的新用户名',
+                  prefixIcon: Icon(Icons.person), // 添加图标
+                  filled: true, // 填充颜色
+                  fillColor: Colors.white, // 背景填充色
+                  border: OutlineInputBorder( // 标准边界
+                    borderRadius: BorderRadius.circular(12), // 圆角边界
+                    borderSide: BorderSide.none, // 无边框
+                  ),
+                  focusedBorder: OutlineInputBorder( // 焦点时的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
+                  enabledBorder: OutlineInputBorder( // 未获得焦点时的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                  ),
+                  errorBorder: OutlineInputBorder( // 错误状态的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder( // 焦点且错误状态的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // 内边距
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '请输入你的新用户名'; // 验证信息
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入用户名';
-                }
-                return null;
-              },
             ),
             Padding(
               padding:
-              EdgeInsets.only(left: 50, right: 50, top: 20, bottom: 50),
+                  EdgeInsets.only(left: 40, right: 40, top: 18, bottom: 10),
+              child: TextFormField(
+                controller: _passwordController,
+                obscureText: true,
+                style: TextStyle(fontSize: 16), // 调整字体大小
+                decoration: InputDecoration(
+                  labelText: '你的密码',
+                  hintText: '输入你的密码',
+                  prefixIcon: Icon(Icons.lock_outline), // 添加图标
+                  filled: true, // 填充颜色
+                  fillColor: Colors.white, // 背景填充色
+                  border: OutlineInputBorder( // 标准边界
+                    borderRadius: BorderRadius.circular(12), // 圆角边界
+                    borderSide: BorderSide.none, // 无边框
+                  ),
+                  focusedBorder: OutlineInputBorder( // 焦点时的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
+                  enabledBorder: OutlineInputBorder( // 未获得焦点时的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                  ),
+                  errorBorder: OutlineInputBorder( // 错误状态的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder( // 焦点且错误状态的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // 内边距
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '请输入你的密码'; // 验证信息
+                  }
+                  return null;
+                },
+              ),
+
+            ),
+            Padding(
+              padding:
+                  EdgeInsets.only(left: 45, right: 45, top: 24, bottom: 50),
               child: ElevatedButton(
                 onPressed: _updateUsername,
-                child: Text('更新用户名',style: TextStyle(fontSize: 18),),
+                child: Text(
+                  '修改用户名',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.blue), // 设置按钮背景色
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.pressed))
+                        return Colors.blue.shade900; // 按钮被按下时的深蓝色
+                      return Colors.blue; // 默认颜色
+                    },
+                  ),
                   foregroundColor: MaterialStateProperty.all(Colors.white), // 设置文字颜色
-                  elevation: MaterialStateProperty.all(8), // 设置阴影
+                  elevation: MaterialStateProperty.all(10), // 提升的阴影效果
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0), // 设置按钮的圆角
-                        side: BorderSide(color: Colors.blue), // 设置边框颜色
+                        borderRadius: BorderRadius.circular(20.0), // 设置按钮的圆角更圆滑
+                        side: BorderSide(color: Colors.blue.shade700), // 设置边框颜色稍深
                       )
                   ),
-                  padding: MaterialStateProperty.all(EdgeInsets.all(16)), // 设置内边距
+                  padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 16, horizontal: 30)), // 调整内边距
+                  overlayColor: MaterialStateProperty.all(Colors.blue.shade700), // 覆盖颜色，提供视觉反馈
                 ),
               ),
+
             ),
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: '旧密码',
-                border: OutlineInputBorder(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserPassword() {
+    return Padding(
+      padding: EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 16),
+      child: Form(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Padding(
+              padding:
+              EdgeInsets.only(left: 40, right: 40, top: 20, bottom: 10),
+              child: TextFormField(
+                controller: _newPasswordController,
+                obscureText: true,
+                style: TextStyle(fontSize: 16), // 调整字体大小
+                decoration: InputDecoration(
+                  labelText: '你的新密码',
+                  hintText: '输入你的新密码',
+                  prefixIcon: Icon(Icons.lock_outline), // 添加图标
+                  filled: true, // 填充颜色
+                  fillColor: Colors.white, // 背景填充色
+                  border: OutlineInputBorder( // 标准边界
+                    borderRadius: BorderRadius.circular(12), // 圆角边界
+                    borderSide: BorderSide.none, // 无边框
+                  ),
+                  focusedBorder: OutlineInputBorder( // 焦点时的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
+                  enabledBorder: OutlineInputBorder( // 未获得焦点时的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                  ),
+                  errorBorder: OutlineInputBorder( // 错误状态的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder( // 焦点且错误状态的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // 内边距
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '请输入你的新密码'; // 验证信息
+                  }
+                  return null;
+                },
               ),
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入旧密码';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 24,),
-            TextFormField(
-              controller: _newPasswordController,
-              decoration: InputDecoration(
-                labelText: '新密码',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入密码';
-                }
-                return null;
-              },
             ),
             Padding(
               padding:
-              EdgeInsets.only(left: 50, right: 50, top: 20, bottom: 20),
+              EdgeInsets.only(left: 40, right: 40, top: 18, bottom: 10),
+              child: TextFormField(
+                controller: _passwordController,
+                obscureText: true,
+                style: TextStyle(fontSize: 16), // 调整字体大小
+                decoration: InputDecoration(
+                  labelText: '你的密码',
+                  hintText: '输入你的密码',
+                  prefixIcon: Icon(Icons.lock_outline), // 添加图标
+                  filled: true, // 填充颜色
+                  fillColor: Colors.white, // 背景填充色
+                  border: OutlineInputBorder( // 标准边界
+                    borderRadius: BorderRadius.circular(12), // 圆角边界
+                    borderSide: BorderSide.none, // 无边框
+                  ),
+                  focusedBorder: OutlineInputBorder( // 焦点时的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
+                  enabledBorder: OutlineInputBorder( // 未获得焦点时的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                  ),
+                  errorBorder: OutlineInputBorder( // 错误状态的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder( // 焦点且错误状态的边界样式
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.red, width: 2),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // 内边距
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '请输入你的密码'; // 验证信息
+                  }
+                  return null;
+                },
+              ),
+
+            ),
+            Padding(
+              padding:
+              EdgeInsets.only(left: 45, right: 45, top: 24, bottom: 50),
               child: ElevatedButton(
                 onPressed: _updatePassword,
-                child: Text('更新密码',style: TextStyle(fontSize: 18),),
+                child: Text(
+                  '修改密码',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.blue), // 设置按钮背景色
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                      if (states.contains(MaterialState.pressed))
+                        return Colors.blue.shade900; // 按钮被按下时的深蓝色
+                      return Colors.blue; // 默认颜色
+                    },
+                  ),
                   foregroundColor: MaterialStateProperty.all(Colors.white), // 设置文字颜色
-                  elevation: MaterialStateProperty.all(8), // 设置阴影
+                  elevation: MaterialStateProperty.all(10), // 提升的阴影效果
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0), // 设置按钮的圆角
-                        side: BorderSide(color: Colors.blue), // 设置边框颜色
+                        borderRadius: BorderRadius.circular(20.0), // 设置按钮的圆角更圆滑
+                        side: BorderSide(color: Colors.blue.shade700), // 设置边框颜色稍深
                       )
                   ),
-                  padding: MaterialStateProperty.all(EdgeInsets.all(16)), // 设置内边距
+                  padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 16, horizontal: 30)), // 调整内边距
+                  overlayColor: MaterialStateProperty.all(Colors.blue.shade700), // 覆盖颜色，提供视觉反馈
                 ),
               ),
             ),
@@ -156,39 +389,71 @@ class _UserPagePageState extends State<UserPagePage> {
   }
 
   Widget _buildLogoutButton() {
-    return Padding(
-      padding: EdgeInsets.only(left: 20, right: 20, top: 0, bottom: 16),
+    return Container(
+      width: 400, // 或者设置为特定的宽度值
+      padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10), // 如果需要边距
       child: ElevatedButton.icon(
         onPressed: _logout,
-        icon: Icon(Icons.exit_to_app),
+        icon: Icon(Icons.exit_to_app, size: 24),
         label: Text('退出登录'),
         style: ElevatedButton.styleFrom(
-          primary: Colors.red,
-          padding: EdgeInsets.symmetric(vertical: 12),
-          textStyle: TextStyle(fontSize: 18),
+          primary: Colors.redAccent,
+          // Use a more vibrant red
+          onPrimary: Colors.white,
+          // Ensure text/icon color is white
+          padding: EdgeInsets.symmetric(vertical: 16),
+          textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 8, // Add some elevation for depth
         ),
       ),
     );
   }
 
-  void _updateUsername() {
-    // Here you would also handle password updating
-    print('用户名已更新为: ${_usernameController.text}');
+
+
+  void _updateUsername() async {
+    bool updated = await _dioClient.updateUserInfo(
+        _passwordController.text, null, _newUsernameController.text);
+    if (updated) {
+      print('用户名已更新为: ${_newUsernameController.text}');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("用户名更新成功！")));
+      Provider.of<UserNotifier>(context, listen: false)
+          .setUsername(_newUsernameController.text);
+      _clear();
+    } else {
+      print('更新用户名失败');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("用户名更新失败！")));
+    }
   }
 
   void _updatePassword() async {
-      bool updated = await _dioClient.updateUserInfo(_passwordController.text,_newPasswordController.text,null);
-      if (updated) {
-        print('密码已更新为: ${_newPasswordController.text}');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("密码更新成功！")));
-      } else {
-        print('更新密码失败');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("密码更新失败！")));
-      }
+    bool updated = await _dioClient.updateUserInfo(
+        _passwordController.text, _newPasswordController.text, null);
+    if (updated) {
+      print('密码已更新为: ${_newPasswordController.text}');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("密码更新成功！")));
+      _clear();
+    } else {
+      print('更新密码失败');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("密码更新失败！")));
     }
+  }
 
   void _logout() {
     print('用户登出');
     Navigator.of(context).pop(); // Or redirect to login screen
+  }
+
+  void _clear() {
+    _newUsernameController.clear();
+    _passwordController.clear();
+    _newPasswordController.clear();
   }
 }

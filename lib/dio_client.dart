@@ -65,5 +65,30 @@ class DioClient {
     }
   }
 
+  //修改用户信息
+  Future<bool> updateUserInfo(String password, String? newPassword, String? newUsername) async {
+    var formData = FormData.fromMap({
+      'password': password,
+      // 只有当参数非空时才添加到表单数据中
+      if (newPassword != null) 'newPassword': newPassword,
+      if (newUsername != null) 'newUsername': newUsername,
+    });
+
+    try {
+      var response = await _dio.post('/user/update', data: formData);
+      if (response.statusCode == 200) {
+        print('用户信息更新成功');
+        return true;
+      } else {
+        print('更新用户信息失败: ${response.data}');
+        return false;
+      }
+    } catch (e) {
+      print('更新用户信息异常: $e');
+      return false;
+    }
+  }
+
+
 }
 

@@ -12,6 +12,7 @@ import 'package:dio/dio.dart';
 import 'package:cptapp/dio_client.dart';
 import 'package:cptapp/providerGL.dart';
 import 'package:provider/provider.dart';
+import 'user/UserPage.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -44,8 +45,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _filterFinanceData2(); // Initial filter setup
     filterOptions = generateFilterOptions(mockFinanceData);
-    Provider.of<UserNotifier>(context, listen: false).fetchUsername().catchError((error) {
-      print("Error: $error");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserNotifier>(context, listen: false).fetchUsername();
     });
   }
 
@@ -136,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.pop(context); // 先关闭抽屉
                 _onItemTapped(2); // 然后跳转到预算管理页面
               }),
-              _buildDrawerItem(Icons.settings, '设置', context, () {
+              _buildDrawerItem(Icons.settings, '我的信息', context, () {
                 Navigator.pop(context); // 先关闭抽屉
                 _onItemTapped(3);
               }),
@@ -164,7 +165,7 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: '我',
+            label: '我的信息',
           ),
         ],
         backgroundColor: Colors.white,
@@ -809,7 +810,7 @@ class _HomePageState extends State<HomePage> {
       case 2:
         return bbsc_mainPage();  // 假设是报表生成的页面
       default:
-        return Center(child: Text("页面未定义"));
+        return UserPagePage();
     }
   }
 

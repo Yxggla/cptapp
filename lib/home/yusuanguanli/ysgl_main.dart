@@ -16,10 +16,14 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
   String? selectedYear;
   String? selectedYear2;
   String? selectedMonth2;
-  final List<String> years = List<String>.generate(3, (int index) => (2022 + index).toString());
-  final List<String> months = List<String>.generate(12, (int index) => (index + 1).toString().padLeft(2, '0'));
+  final List<String> years =
+      List<String>.generate(3, (int index) => (2022 + index).toString());
+  final List<String> months = List<String>.generate(
+      12, (int index) => (index + 1).toString().padLeft(2, '0'));
   TextEditingController amountController = TextEditingController();
-  int moneyyear=10000;
+  int moneyYear = 10000;
+  int moneyMonth = 1000;
+  int _contentMode = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +31,25 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
       body: ListView(
         children: [
           _buildHeader(),
-          _buildYS(),
+          _buildSelect(),
+          _buildContent(),
         ],
       ),
-         // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
+  Widget _buildContent() {
+    switch (_contentMode) {
+      case 0:
+        return _buildYearYs();
+      case 1:
+        return _buildMonthYs();
+      // case 2:
+      //   return ;
+      default:
+        return Container(); // 默认情况，返回一个空的容器
+    }
+  }
 
   Widget _buildHeader() {
     final username = Provider.of<UserNotifier>(context).username;
@@ -49,62 +65,20 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
       ),
     );
   }
-  Widget _buildYS() {
-    return Container(
-      padding: EdgeInsets.all(16),
-      margin: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 5,
-            blurRadius: 7,
-            offset: Offset(0, 3),
-          ),
-        ],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 使用 MainAxisAlignment 来调整子部件之间的间距
-            children: [
-              Text(
-                '财务预算',
-                style: TextStyle(fontSize: 28),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // 在这里添加按钮的功能
-                },
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.blue), // 设置按钮背景色
-                  foregroundColor: MaterialStateProperty.all(Colors.white), // 设置文字颜色
-                  elevation: MaterialStateProperty.all(8), // 设置阴影
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0), // 设置按钮的圆角
-                        side: BorderSide(color: Colors.blue), // 设置边框颜色
-                      )
-                  ),
-                  padding: MaterialStateProperty.all(EdgeInsets.all(10)), // 设置内边距
-                ),
-                child: Text(
-                  '财务跟踪',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-            ],
-          ),
 
-          SizedBox(height: 30),
-          Row(
+  Widget _buildYearYs() {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 16),
+          child: Row(
             children: [
               Expanded(
-                flex: 4,
-                child: Text('年度预算：',style: TextStyle(fontSize: 24),)
-              ),
+                  flex: 4,
+                  child: Text(
+                    '年度预算：',
+                    style: TextStyle(fontSize: 24),
+                  )),
               SizedBox(width: 10),
               Expanded(
                 flex: 6,
@@ -133,14 +107,34 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
               ),
             ],
           ),
-          SizedBox(height: 20),
-          Text('预算:先写死吧$moneyyear',style: TextStyle(fontSize: 28),),
-          SizedBox(height: 50),
-          Row(
+        ),
+
+        _buildLookYS('年'),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            '预算:先写死吧$moneyYear',
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+        _buildSQYS('年'),
+      ],
+    );
+  }
+
+  Widget _buildMonthYs() {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 16),
+          child: Row(
             children: [
               Expanded(
-                  flex: 4,
-                  child: Text('月度预算：',style: TextStyle(fontSize: 24),)
+                flex: 4,
+                child: Text(
+                  '月度预算：',
+                  style: TextStyle(fontSize: 24),
+                ),
               ),
               Expanded(
                 flex: 3,
@@ -189,31 +183,157 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
               ),
             ],
           ),
-          SizedBox(height: 20),
-          Text('预算:先写死吧$moneyyear',style: TextStyle(fontSize: 28),),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              // 在这里添加按钮点击后的行为
-            },
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue), // 设置按钮背景色
-              foregroundColor: MaterialStateProperty.all(Colors.white), // 设置文字颜色
-              elevation: MaterialStateProperty.all(8), // 设置阴影
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0), // 设置按钮的圆角
-                    side: BorderSide(color: Colors.blue), // 设置边框颜色
-                  )
-              ),
-              padding: MaterialStateProperty.all(EdgeInsets.all(16)), // 设置内边距
-            ),
-            child: Text('申请预算调整',style: TextStyle(fontSize: 22),),
+        ),
+        _buildLookYS('月'),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            '预算:先写死吧$moneyMonth',
+            style: TextStyle(fontSize: 16),
           ),
-          SizedBox(height: 20),
-        ],
+        ),
+        _buildSQYS('月'),
+      ],
+    );
+  }
+
+  Widget _buildSelect() {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      crossAxisSpacing: 10,
+      // 横向间隔
+      mainAxisSpacing: 10,
+      // 纵向间隔
+      childAspectRatio: 1,
+      // 调整子元素宽高比
+      padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+      children: <Widget>[
+        _buildButton('年度预算', Icons.wallet, 0),
+        _buildButton('月度预算', Icons.wallet, 1),
+        _buildButton('财务跟踪', Icons.wallet, 2),
+      ],
+    );
+  }
+
+  Widget _buildButton(String text, IconData icon, int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _contentMode = index;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.all(22), // 设置内部边距
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20), // 设置圆角
+          boxShadow: [
+            // 可选，添加阴影效果
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 6,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(icon,
+                size: 24,
+                color: _contentMode == index ? Colors.blue : Colors.black),
+            // 图标颜色也进行区分
+            SizedBox(height: 8),
+            Text(text,
+                style: TextStyle(
+                    fontSize: 16,
+                    color: _contentMode == index ? Colors.blue : Colors.black)),
+          ],
+        ),
       ),
     );
   }
 
+
+  Widget _buildLookYS(String lable){
+    return Padding(
+      padding: EdgeInsets.only(left: 45, right: 45, top: 24, bottom: 10),
+      child: ElevatedButton(
+        onPressed: () {
+          // 这里添加按钮点击时的处理逻辑
+        },
+        child: Text(
+          '查询此$lable预算',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+              if (states.contains(MaterialState.pressed))
+                return Colors.blue.shade900; // 按钮被按下时的深蓝色
+              return Colors.blue; // 默认颜色
+            },
+          ),
+          foregroundColor: MaterialStateProperty.all(Colors.white),
+          // 设置文字颜色
+          elevation: MaterialStateProperty.all(10),
+          // 提升的阴影效果
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0), // 设置按钮的圆角更圆滑
+                side: BorderSide(color: Colors.blue.shade700), // 设置边框颜色稍深
+              )),
+          padding: MaterialStateProperty.all(
+              EdgeInsets.symmetric(vertical: 16, horizontal: 30)),
+          // 调整内边距
+          overlayColor: MaterialStateProperty.all(
+              Colors.blue.shade700), // 覆盖颜色，提供视觉反馈
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSQYS(String lable){
+    return Padding(
+      padding: EdgeInsets.only(left: 45, right: 45, top: 100, bottom: 10),
+      child: ElevatedButton(
+        onPressed: () {
+          // 这里添加按钮点击时的处理逻辑
+        },
+        child: Text(
+          '申请此$lable预算调整',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+              if (states.contains(MaterialState.pressed))
+                return Colors.blue.shade900; // 按钮被按下时的深蓝色
+              return Colors.blue; // 默认颜色
+            },
+          ),
+          foregroundColor: MaterialStateProperty.all(Colors.white),
+          // 设置文字颜色
+          elevation: MaterialStateProperty.all(10),
+          // 提升的阴影效果
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0), // 设置按钮的圆角更圆滑
+                side: BorderSide(color: Colors.blue.shade700), // 设置边框颜色稍深
+              )),
+          padding: MaterialStateProperty.all(
+              EdgeInsets.symmetric(vertical: 16, horizontal: 30)),
+          // 调整内边距
+          overlayColor: MaterialStateProperty.all(
+              Colors.blue.shade700), // 覆盖颜色，提供视觉反馈
+        ),
+      ),
+    );
+  }
+  void ShowValue(){
+
+  }
 }

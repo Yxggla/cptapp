@@ -5,10 +5,14 @@ class UserNotifier extends ChangeNotifier {
   String? _username;
   bool _isLoading = false;
   String? _error;
+  double? _annualBudget;
+  double? _monthlyBudget;
 
   String? get username => _username;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  double? get annualBudget => _annualBudget;
+  double? get monthlyBudget => _monthlyBudget;
 
   void setUsername(String? username) {
     _username = username;
@@ -35,5 +39,21 @@ class UserNotifier extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void setAnnualBudget(double? budget) {
+    _annualBudget = budget;
+    notifyListeners();
+  }
+
+  void setMonthlyBudget(double? budget) {
+    _monthlyBudget = budget;
+    notifyListeners();
+  }
+
+  void clearBudgets() {
+    _annualBudget = null;
+    _monthlyBudget = null;
+    notifyListeners();
   }
 }

@@ -24,6 +24,10 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
   int moneyYear = 10000;
   int moneyMonth = 1000;
   int _contentMode = 0;
+  String BudgetYear='';
+  String BudgetMonth='';
+  bool _showBudget1 = false;
+  bool _showBudget2 = false;
 
   @override
   Widget build(BuildContext context) {
@@ -70,23 +74,18 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 16),
+          padding: EdgeInsets.only(left: 60, right: 60, top: 28, bottom: 10),
           child: Row(
             children: [
-              Expanded(
-                  flex: 4,
-                  child: Text(
-                    '年度预算：',
-                    style: TextStyle(fontSize: 24),
-                  )),
-              SizedBox(width: 10),
               Expanded(
                 flex: 6,
                 child: DropdownButtonFormField<String>(
                   value: selectedYear,
                   decoration: InputDecoration(
                     labelText: '年度选择',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0), // 设置圆角半径
+                    ),
                   ),
                   items: years.map((String year) {
                     return DropdownMenuItem(
@@ -94,9 +93,8 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
                       child: Text(year),
                     );
                   }).toList(),
-
                   // 下拉菜单背景颜色
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
                   // 下拉菜单的圆角
                   onChanged: (value) {
                     setState(() {
@@ -110,14 +108,7 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
         ),
 
         _buildLookYS('年'),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            '预算:先写死吧$moneyYear',
-            style: TextStyle(fontSize: 16),
-          ),
-        ),
-        _buildSQYS('年'),
+        if (_showBudget1) _buildYuSuanYear(),
       ],
     );
   }
@@ -126,23 +117,17 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 16),
+          padding: EdgeInsets.only(left: 30, right: 30, top: 28, bottom: 10),
           child: Row(
             children: [
               Expanded(
-                flex: 4,
-                child: Text(
-                  '月度预算：',
-                  style: TextStyle(fontSize: 24),
-                ),
-              ),
-              Expanded(
-                flex: 3,
                 child: DropdownButtonFormField<String>(
                   value: selectedYear2,
                   decoration: InputDecoration(
-                    labelText: '年度选择',
-                    border: OutlineInputBorder(),
+                    labelText: '年度',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   items: years.map((String year) {
                     return DropdownMenuItem(
@@ -150,7 +135,7 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
                       child: Text(year),
                     );
                   }).toList(),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
                   onChanged: (value) {
                     setState(() {
                       selectedYear2 = value;
@@ -160,12 +145,13 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
               ),
               SizedBox(width: 10),
               Expanded(
-                flex: 3,
                 child: DropdownButtonFormField<String>(
                   value: selectedMonth2,
                   decoration: InputDecoration(
-                    labelText: '月份选择',
-                    border: OutlineInputBorder(),
+                    labelText: '月份',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   items: months.map((String month) {
                     return DropdownMenuItem(
@@ -173,7 +159,7 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
                       child: Text(month),
                     );
                   }).toList(),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
                   onChanged: (value) {
                     setState(() {
                       selectedMonth2 = value;
@@ -185,14 +171,7 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
           ),
         ),
         _buildLookYS('月'),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            '预算:先写死吧$moneyMonth',
-            style: TextStyle(fontSize: 16),
-          ),
-        ),
-        _buildSQYS('月'),
+        if (_showBudget2) _buildYuSuanMonth(),
       ],
     );
   }
@@ -206,7 +185,7 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
       // 横向间隔
       mainAxisSpacing: 10,
       // 纵向间隔
-      childAspectRatio: 1,
+      childAspectRatio: 1.1,
       // 调整子元素宽高比
       padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
       children: <Widget>[
@@ -222,10 +201,12 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
       onTap: () {
         setState(() {
           _contentMode = index;
+          _showBudget1=false;
+          _showBudget2=false;
         });
       },
       child: Container(
-        padding: EdgeInsets.all(22), // 设置内部边距
+        padding: EdgeInsets.all(26), // 设置内部边距
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20), // 设置圆角
@@ -262,9 +243,7 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
     return Padding(
       padding: EdgeInsets.only(left: 45, right: 45, top: 24, bottom: 10),
       child: ElevatedButton(
-        onPressed: () {
-          // 这里添加按钮点击时的处理逻辑
-        },
+        onPressed:  ShowValue,
         child: Text(
           '查询此$lable预算',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -298,7 +277,7 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
 
   Widget _buildSQYS(String lable){
     return Padding(
-      padding: EdgeInsets.only(left: 45, right: 45, top: 100, bottom: 10),
+      padding: EdgeInsets.only(left: 45, right: 45, top: 80, bottom: 10),
       child: ElevatedButton(
         onPressed: () {
           // 这里添加按钮点击时的处理逻辑
@@ -333,7 +312,48 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
       ),
     );
   }
-  void ShowValue(){
+  Widget _buildYuSuanYear(){
+    return Column(
+        children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+              child: Text(
+                BudgetYear,
+                style: TextStyle(fontSize: 36),
+              ),
+            ),
+          _buildSQYS('年'),
+          ]
+    );
+  }
 
+  Widget  _buildYuSuanMonth(){
+    return Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+            child: Text(
+              BudgetMonth,
+              style: TextStyle(fontSize: 36),
+            ),
+          ),
+          _buildSQYS('月'),
+        ]
+    );
+  }
+
+
+  void ShowValue(){
+    setState(() {
+      if (_contentMode == 0) {
+        _showBudget1 = true;
+        _showBudget2 = false;
+        BudgetYear='此年预算为：$moneyYear';
+      } else {
+        _showBudget1 = false;
+        _showBudget2 = true;
+        BudgetMonth='此月预算为：$moneyMonth';
+      }
+    });
   }
 }

@@ -181,13 +181,13 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       crossAxisCount: 3,
-      crossAxisSpacing: 10,
+      crossAxisSpacing: 20,
       // 横向间隔
       mainAxisSpacing: 10,
       // 纵向间隔
       childAspectRatio: 1.1,
       // 调整子元素宽高比
-      padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+      padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       children: <Widget>[
         _buildButton('年度预算', Icons.wallet, 0),
         _buildButton('月度预算', Icons.wallet, 1),
@@ -206,7 +206,7 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
         });
       },
       child: Container(
-        padding: EdgeInsets.all(26), // 设置内部边距
+        padding: EdgeInsets.all(22), // 设置内部边距
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20), // 设置圆角
@@ -224,13 +224,13 @@ class _ysgl_mainPageState extends State<ysgl_mainPage> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Icon(icon,
-                size: 24,
+                size: 30,
                 color: _contentMode == index ? Colors.blue : Colors.black),
             // 图标颜色也进行区分
             SizedBox(height: 8),
             Text(text,
                 style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     color: _contentMode == index ? Colors.blue : Colors.black)),
           ],
         ),

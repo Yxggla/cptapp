@@ -55,7 +55,9 @@ class SignInPage extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 16,),
+              SizedBox(
+                height: 16,
+              ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: DecoratedBox(
@@ -75,7 +77,8 @@ class SignInPage extends StatelessWidget {
                       filled: true,
                       fillColor: Colors.white,
                       hintText: '输入你的手机号',
-                      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 18, horizontal: 20),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -103,7 +106,9 @@ class SignInPage extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 16,),
+              SizedBox(
+                height: 16,
+              ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 30),
                 child: DecoratedBox(
@@ -124,7 +129,8 @@ class SignInPage extends StatelessWidget {
                       filled: true,
                       fillColor: Colors.white,
                       hintText: '请输入密码',
-                      contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 18, horizontal: 20),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -150,7 +156,8 @@ class SignInPage extends StatelessWidget {
                       passwordController.text,
                     );
                     if (isLoggedIn) {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomePage()));
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => HomePage()));
                     } else {
                       showDialog(
                         context: context,
@@ -178,51 +185,66 @@ class SignInPage extends StatelessWidget {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.blue, // 按钮背景颜色
-                    onPrimary: Colors.white, // 按钮文字颜色
-                    elevation: 5, // 阴影高度
-                    padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18), // 按钮内边距
-                    shape: RoundedRectangleBorder( // 形状
+                    primary: Colors.blue,
+                    // 按钮背景颜色
+                    onPrimary: Colors.white,
+                    // 按钮文字颜色
+                    elevation: 5,
+                    // 阴影高度
+                    padding: EdgeInsets.symmetric(horizontal: 60, vertical: 18),
+                    // 按钮内边距
+                    shape: RoundedRectangleBorder(
+                      // 形状
                       borderRadius: BorderRadius.circular(15), // 圆角边框
                     ),
                     side: BorderSide(color: Colors.white, width: 1), // 边框颜色和宽度
                   ),
-
                 ),
               ),
               Spacer(flex: 1),
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (context, animation, secondaryAnimation) =>
-                              SignUpPage(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            var curve = Curves.easeIn;
-                            var curvedAnimation = CurvedAnimation(
-                              parent: animation,
-                              curve: curve,
-                            );
-                            return FadeTransition(
-                              opacity: curvedAnimation,
-                              child: child,
-                            );
-                          },
-                        ));
-                  },
-                  child: Text(
-                    "还没有账号？   注册",
-                    style: TextStyle(color: Colors.white,fontSize: 16),
-                  ),
-                ),
-              ),
+              _buildDown(context),
               Spacer(flex: 5),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDown(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.0), // 添加一些内边距
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.0), // 设置圆角
+      ),
+      child: Center(
+        child: TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    SignUpPage(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  var curve = Curves.easeIn;
+                  var curvedAnimation = CurvedAnimation(
+                    parent: animation,
+                    curve: curve,
+                  );
+                  return FadeTransition(
+                    opacity: curvedAnimation,
+                    child: child,
+                  );
+                },
+              ),
+            );
+          },
+          child: Text(
+            "还没有账号？   注册",
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
       ),
     );
   }

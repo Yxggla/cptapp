@@ -1,26 +1,88 @@
-class FinanceItem {
-  final String title;
-  final String context;
-  final int amount;
-  final String Date;
-  final bool baoxiao;
+// models.dart
+import 'package:intl/intl.dart';
 
-  FinanceItem({
-    required this.title,
-    required this.context,
-    required this.amount,
-    required this.Date,
-    required this.baoxiao
-  });
+enum BaoxiaoState {
+  unapproved,  // 未通过
+  approved,    // 已报销
+  pending      // 审核中
 }
 
-List<FinanceItem> mockFinanceData = [
-  FinanceItem(title: '飞机票', context: '交通', amount: 1000, Date: '2024-3', baoxiao: true),
-  FinanceItem(title: '火车票', context: '交通', amount: 800, Date: '2024-3', baoxiao: false),
-  FinanceItem(title: '酒店费', context: '住宿', amount: 1500, Date: '2024-3', baoxiao: true),
-  FinanceItem(title: '请老板吃饭钱', context: '餐饮', amount: 8500, Date: '2024-4', baoxiao: true),
-  FinanceItem(title: '报销的电话费', context: '电话费', amount: 200, Date: '2024-3', baoxiao: false),
-];
+class FinanceItem {
+  final int id;
+  final String createdAt;
+  final String updatedAt;
+  final String deletedAt;
+  final String owner;
+  final int type;
+  final String name;
+  final int cost;
+  final BaoxiaoState state;
+
+  FinanceItem({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.deletedAt,
+    required this.owner,
+    required this.type,
+    required this.name,
+    required this.cost,
+    required this.state,
+  });
+
+  // fromJson 方法
+  factory FinanceItem.fromJson(Map<String, dynamic> json) {
+    return FinanceItem(
+      id: json['id'] ?? 0,
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
+      deletedAt: json['deletedAt'] ?? '',
+      owner: json['owner'] ?? '',
+      type: json['type'] ?? 0,
+      name: json['name']  ?? '',
+      cost: json['cost'] ?? 0,
+      state: _baoxiaoStateFromInt(json['state']),
+    );
+  }
+
+  // 将整数转换为枚举类型
+  static BaoxiaoState _baoxiaoStateFromInt(int state) {
+    switch (state) {
+      case 0:
+        return BaoxiaoState.unapproved;
+      case 1:
+        return BaoxiaoState.approved;
+      case 2:
+        return BaoxiaoState.pending;
+      default:
+        throw ArgumentError('Unknown baoxiao state: $state');
+    }
+  }
+
+  String get typeString => _typeToString(type);
+
+  // 将整数类型转换为字符串表示
+  static String _typeToString(int type) {
+    const typeMap = {
+      0: '住宿',
+      1: '餐饮',
+      2: '出行',
+      3: '应酬',
+      4: '采购',
+      5: '团建',
+    };
+    return typeMap[type] ?? '未知';
+  }
+  String get formattedCreatedAt {
+    try {
+      final DateTime dateTime = DateTime.parse(createdAt);
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+    } catch (e) {
+      return createdAt; // 如果解析失败，则返回原始字符串
+    }
+  }
+
+}
 
 class UserItem{
   final String username;

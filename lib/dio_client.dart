@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
 import 'savelingpai.dart';  // 导入令牌保存和获取的类
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cptapp/classdata.dart';
 
 class DioClient {
   Dio _dio = Dio(BaseOptions(
     baseUrl: 'http://121.43.138.158:8080/api/v1',
-    connectTimeout: 5000,  // 连接服务器超时时间，单位是毫秒.
-    receiveTimeout: 3000,  // 接收数据的最长时限，单位是毫秒.
+    connectTimeout: 5000, // 连接服务器超时时间，单位是毫秒.
+    receiveTimeout: 3000, // 接收数据的最长时限，单位是毫秒.
   ));
 
   DioClient() {
@@ -23,8 +24,9 @@ class DioClient {
       },
       onResponse: (response, handler) async {
         // 检查是否为登录请求并处理令牌
-        if (response.requestOptions.path.endsWith("/user/login")&& response.statusCode == 200) {
-          var token = response.data['data'];  // 假设令牌在data字段
+        if (response.requestOptions.path.endsWith("/user/login") &&
+            response.statusCode == 200) {
+          var token = response.data['data']; // 假设令牌在data字段
           if (token != null) {
             await TokenStorage.saveToken(token);
             // 打印令牌
@@ -54,7 +56,8 @@ class DioClient {
       print("HTTP Status Code: ${response.statusCode}"); // 打印状态码
       print("Response data: ${response.data}"); // 打印响应体内容
       if (response.statusCode == 200) {
-        var username = response.data['data']['username']; // 假设用户名存储在响应的 'username' 字段
+        var username = response
+            .data['data']['username']; // 假设用户名存储在响应的 'username' 字段
         print("Username extracted: $username"); // 打印提取的用户名
         return username;
       }
@@ -66,7 +69,8 @@ class DioClient {
   }
 
   //修改用户信息
-  Future<bool> updateUserInfo(String password, String? newPassword, String? newUsername) async {
+  Future<bool> updateUserInfo(String password, String? newPassword,
+      String? newUsername) async {
     var formData = FormData.fromMap({
       'password': password,
       // 只有当参数非空时才添加到表单数据中
@@ -89,6 +93,87 @@ class DioClient {
     }
   }
 
+  Future<bool> billUpLoad(int category, int amount, String name) async {
+    var formData = FormData.fromMap({
+      'type': category,
+      'cost': amount,
+      'name': name,
+    });
 
+    try {
+      var response = await _dio.post('/bill/upload', data: formData);
+      if (response.statusCode == 200) {
+        print('账单上传成功');
+        return true;
+      } else {
+        print('账单上传失败: ${response.data}');
+        return false;
+      }
+    } catch (e) {
+      print('账单上传异常: $e');
+      return false;
+    }
+  }
+
+  //获取账单
+  Future<List<FinanceItem>> fetchFinanceData() async {
+    try {
+      var response = await _dio.get('/bill/getBills');
+      if (response.statusCode == 200) {
+        List<FinanceItem> financeItems = (response.data['data'] as List)
+            .map((item) => FinanceItem.fromJson(item))
+            .toList();
+        return financeItems;
+      }
+      return [];
+    } catch (e) {
+      print('获取财务数据异常: $e');
+      return [];
+    }
+  }
 }
+
+
+extension FinanceItemExtension on FinanceItem {
+  static FinanceItem fromJson(Map<String, dynamic> json) {
+    return FinanceItem(
+      id: json['id'] ?? 0,
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
+      deletedAt: json['deletedAt'] ?? '',
+      owner: json['owner'] ?? '',
+      type: json['type'] ?? 0,
+      name: json['name']  ?? '',
+      cost: json['cost'] ?? 0,
+      state: _baoxiaoStateFromInt(json['state']),
+    );
+  }
+
+  // 将整数转换为枚举类型
+  static BaoxiaoState _baoxiaoStateFromInt(int state) {
+    switch (state) {
+      case 0:
+        return BaoxiaoState.unapproved;
+      case 1:
+        return BaoxiaoState.approved;
+      case 2:
+        return BaoxiaoState.pending;
+      default:
+        throw ArgumentError('Unknown baoxiao state: $state');
+    }
+  }
+}
+
+
+extension UserItemExtension on UserItem {
+  static UserItem fromJson(Map<String, dynamic> json) {
+    return UserItem(
+      username: json['username'],
+      phone: json['phone'],
+    );
+  }
+}
+
+
+
 

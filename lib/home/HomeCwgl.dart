@@ -22,38 +22,44 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _isSearching = false;
+  bool isLoading = true;
   final FocusNode _focusNode = FocusNode();
   int _contentMode = 0; // 默认模式
   final CameraService _cameraService = CameraService();
   String _currentFilter = '全部'; // Default filter
-  List<FinanceItem> _filteredFinanceData = []; // List to hold filtered data
-  double _currentMinAmount = 0.0;
-  double _currentMaxAmount = 10000.0; // You can set this based on your data
+  List<FinanceItem> financeItems = [];
   TextEditingController _minAmountController = TextEditingController();
   TextEditingController _maxAmountController = TextEditingController();
-  List<String> filterOptions = [];
-  String _selectedReimbursement = '全部';
-  String? _selectedCategory_lr; // 当前选中的类别
-  final List<String> _categories = ['类别1', '类别2', '类别3', '类别4']; // 可选的类别列表
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
+  List<String> filterOptions = ['全部','住宿', '餐饮', '出行', '应酬','采购','团建','电话费'];
+  String _selectedReimbursement = '';
+  final List<String> _categories = ['住宿', '餐饮', '出行', '应酬','采购','团建']; // 可选的类别列表
   int _selectedIndex_bottom = 0;
   final List<String> _titles = ['财务管理', '预算管理', '报表生成', '我的信息'];
+  final List<String> reimbursementOptions = ['全部', '已报销', '未报销', '审核中'];
   String? username;
+  DioClient _dioClient = DioClient();
+  int? _selectedCategory_lr; //录入时的选择的类别索引
+  int? _selectedBXIndex;  // 分类中保存选择的是否报销索引
+  int? _selectedCategory_fl; //分类中保存选择的类型索引
 
+
+
+  @override
+  void dispose() {
+    _minAmountController.dispose();
+    _maxAmountController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
-    _filterFinanceData2(); // Initial filter setup
-    filterOptions = generateFilterOptions(mockFinanceData);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<UserNotifier>(context, listen: false).fetchUsername();
     });
-  }
-
-  List<String> generateFilterOptions(List<FinanceItem> data) {
-    var uniqueContexts = data.map((item) => item.context).toSet();// 使用 Set 来获取所有独特的 context 值
-    // 将 Set 转换为 List，并添加一个 '全部' 选项
-    return ['全部', ...uniqueContexts];
+    fetchFinanceData();
   }
 
   @override
@@ -266,6 +272,7 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         setState(() {
           _contentMode = index; // 根据索引切换模式
+          handleRefresh();
         });
       },
       child: Container(
@@ -302,7 +309,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFinanceItem(
-      String title, String context, int amount, String Date, bool baoxiao) {
+      String name, String typeString, int cost, String formattedCreatedAt, BaoxiaoState state) {
     return Container(
         margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
         // 外边距，为容器与其他元素提供间隔
@@ -322,7 +329,7 @@ class _HomePageState extends State<HomePage> {
         child: ListTile(
           leading: Icon(Icons.receipt, color: Colors.blue, size: 30),
           title: Text(
-            '$title',
+            '$name',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 18,
@@ -332,11 +339,11 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text('类型: $context', style: TextStyle(fontSize: 16)),
+              Text('类型: $typeString', style: TextStyle(fontSize: 16)),
               // 注意这里应该显示类型而不是重复标题
-              Text('金额: ¥$amount',
+              Text('金额: ¥$cost',
                   style: TextStyle(fontSize: 16, color: Colors.green)),
-              Text('日期: $Date',
+              Text('日期: $formattedCreatedAt',
                   style: TextStyle(fontSize: 14, color: Colors.grey)),
             ],
           ),
@@ -344,17 +351,34 @@ class _HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Icon(
-                baoxiao ? Icons.check_circle : Icons.cancel, // 根据baoxiao变量选择图标
-                color: baoxiao ? Colors.green : Colors.red, // 根据baoxiao变量选择颜色
+                state == 1
+                    ? Icons.check_circle
+                    : state == 2
+                    ? Icons.hourglass_empty
+                    : Icons.cancel, // 根据baoxiao变量选择图标
+                color: state == 1
+                    ? Colors.green
+                    : state == 2
+                    ? Colors.orange
+                    : Colors.red, // 根据baoxiao变量选择颜色
               ),
               Text(
-                baoxiao ? '已报销' : '未报销', // 根据baoxiao变量选择文本
+                state == 1
+                    ? '已报销'
+                    : state == 2
+                    ? '审核中'
+                    : '未通过', // 根据baoxiao变量选择文本
                 style: TextStyle(
-                  color: baoxiao ? Colors.green : Colors.red,
+                  color: state == 1
+                      ? Colors.green
+                      : state == 2
+                      ? Colors.orange
+                      : Colors.red,
                   // 根据baoxiao变量选择文本颜色
                   fontSize: 14,
                 ),
               ),
+
             ],
           ),
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -411,25 +435,47 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           SizedBox(height: 8),
-          _buildTextField("名称"),
+          _buildTextField("名称",_nameController),
           _buildTextField_LeiBie("类别"), // 重构的文本输入框
-          _buildTextField("金额"),
+          _buildTextField("金额",_amountController),
           SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {},
-            child: Text("保存"),
-            style: ElevatedButton.styleFrom(
-              primary: Colors.blue, // 按钮颜色
-              onPrimary: Colors.white, // 文字颜色
-              minimumSize: Size(double.infinity, 50), // 按钮大小，宽度充满容器
+          Padding(
+            padding: EdgeInsets.only(left: 45, right: 45, top: 10, bottom: 20),
+            child:ElevatedButton(
+              onPressed: billUpLoad,
+              child: Text("上传",style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.pressed))
+                      return Colors.blue.shade900; // 按钮被按下时的深蓝色
+                    return Colors.blue; // 默认颜色
+                  },
+                ),
+                foregroundColor: MaterialStateProperty.all(Colors.white),
+                // 设置文字颜色
+                elevation: MaterialStateProperty.all(10),
+                // 提升的阴影效果
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0), // 设置按钮的圆角更圆滑
+                      side: BorderSide(color: Colors.blue.shade700), // 设置边框颜色稍深
+                    )),
+                padding: MaterialStateProperty.all(
+                    EdgeInsets.symmetric(vertical: 16, horizontal: 100)),
+                // 调整内边距
+                overlayColor: MaterialStateProperty.all(
+                    Colors.blue.shade700), // 覆盖颜色，提供视觉反馈
+              ),
             ),
           ),
+
         ],
       ),
     );
   }
 
-  Widget _buildTextField(String label) {
+  Widget _buildTextField(String label,TextEditingController controller) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 4.0),
       padding: EdgeInsets.only(bottom: 10), // 在每个文本输入框下方增加间距
@@ -443,6 +489,7 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             flex: 3, // 输入框占用可用空间的比例
             child: TextField(
+              controller: controller,
               style: TextStyle(fontSize: 16, color: Colors.black87), // 设置文本样式
               decoration: InputDecoration(
                 hintStyle: TextStyle(color: Colors.grey),
@@ -466,7 +513,7 @@ class _HomePageState extends State<HomePage> {
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding:
-                    EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                    EdgeInsets.symmetric(vertical: 18, horizontal: 20),
               ),
             ),
           ),
@@ -489,7 +536,7 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             flex: 3, // 输入框占用可用空间的比例
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
               // 内边距调整
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey.shade400, width: 1),
@@ -498,26 +545,26 @@ class _HomePageState extends State<HomePage> {
               ),
               child: DropdownButtonHideUnderline(
                 // 隐藏默认的下划线
-                child: DropdownButton<String>(
+                child: DropdownButton<int>(
                   value: _selectedCategory_lr,
                   icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
                   // 下拉图标和颜色
-                  onChanged: (String? newValue) {
+                  onChanged: (int? newIndex) {
                     setState(() {
-                      _selectedCategory_lr = newValue;
+                      _selectedCategory_lr = newIndex;
                     });
                   },
-                  items:
-                      _categories.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
+                  items: _categories.asMap().entries.map<DropdownMenuItem<int>>((entry) {
+                    int idx = entry.key;
+                    String val = entry.value;
+                    return DropdownMenuItem<int>(
+                      value: idx,
                       child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 10), // 文本容器的内边距
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         decoration: BoxDecoration(
-                          color: Colors.white, // 菜单项背景色
+                          color: Colors.white,
                         ),
-                        child: Text(value),
+                        child: Text(val),
                       ),
                     );
                   }).toList(),
@@ -548,33 +595,42 @@ class _HomePageState extends State<HomePage> {
       ),
       child: DropdownButtonHideUnderline(
         // Hide the default underline of a dropdown
-        child: DropdownButton<String>(
-          value: _currentFilter,
-          icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
-          iconSize: 24,
-          elevation: 12,
-          style: TextStyle(color: Colors.blue, fontSize: 16),
-          onChanged: (String? newValue) {
-            setState(() {
-              _currentFilter = newValue!;
-              _filterFinanceData2();
-            });
-          },
-          items: filterOptions.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          dropdownColor: Colors.white, // Dropdown menu background color
-          borderRadius: BorderRadius.circular(16),
-        ),
+        child: DropdownButton<int>(
+        value: _selectedCategory_fl,
+        icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
+        // 下拉图标和颜色
+        onChanged: (int? newIndex) {
+          setState(() {
+            _selectedCategory_fl = newIndex;
+          });
+        },
+        items: filterOptions.asMap().entries.map<DropdownMenuItem<int>>((entry) {
+          int idx = entry.key;
+          String val = entry.value;
+          return DropdownMenuItem<int>(
+            value: idx,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Text(val),
+            ),
+          );
+        }).toList(),
+        dropdownColor: Colors.white,
+        // 下拉菜单背景颜色
+        borderRadius: BorderRadius.circular(16),
+        // 下拉菜单的圆角
+        elevation: 5,
+        // 下拉菜单阴影的高度
+        style: TextStyle(color: Colors.black87, fontSize: 16), // 文本样式
+      ),
       ),
     );
   }
 
   Widget _buildReimbursementFilter() {
-    List<String> reimbursementOptions = ['全部', '已报销', '未报销'];
     return Container(
       padding: const EdgeInsets.only(left: 26, right: 26.0),
       decoration: BoxDecoration(
@@ -584,23 +640,29 @@ class _HomePageState extends State<HomePage> {
             color: Colors.blueAccent, width: 2), // Border color and width
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedReimbursement,
+        child: DropdownButton<int>(
+          value: _selectedBXIndex,
           icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
           iconSize: 24,
           elevation: 12,
           style: TextStyle(color: Colors.blue, fontSize: 16),
-          onChanged: (String? newValue) {
+          onChanged: (int? newIndex) {
             setState(() {
-              _selectedReimbursement = newValue!;
-              _filterFinanceData2(); // 更新筛选逻辑
+              _selectedBXIndex = newIndex;
             });
           },
-          items: reimbursementOptions
-              .map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
+          items: reimbursementOptions.asMap().entries.map<DropdownMenuItem<int>>((entry) {
+            int idx = entry.key;
+            String val = entry.value;
+            return DropdownMenuItem<int>(
+              value: idx,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                ),
+                child: Text(val),
+              ),
             );
           }).toList(),
           borderRadius: BorderRadius.circular(16),
@@ -628,9 +690,7 @@ class _HomePageState extends State<HomePage> {
                     EdgeInsets.symmetric(vertical: 16, horizontal: 14),
               ),
               keyboardType: TextInputType.number,
-              onChanged: (value) {
-                _filterFinanceData2(); // Optionally update filter upon each edit
-              },
+              onChanged: null,
             ),
           ),
         ),
@@ -649,9 +709,7 @@ class _HomePageState extends State<HomePage> {
                     EdgeInsets.symmetric(vertical: 16, horizontal: 14),
               ),
               keyboardType: TextInputType.number,
-              onChanged: (value) {
-                _filterFinanceData2(); // Optionally update filter upon each edit
-              },
+              onChanged: null,
             ),
           ),
         ),
@@ -659,32 +717,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _filterFinanceData2() {
-    double minAmount = double.tryParse(_minAmountController.text) ?? 0;
-    double maxAmount =
-        double.tryParse(_maxAmountController.text) ?? double.infinity;
 
-    _filteredFinanceData = mockFinanceData.where((item) {
-      bool matchesType =
-          _currentFilter == '全部' || item.context == _currentFilter;
-      bool matchesAmount = item.amount >= minAmount && item.amount <= maxAmount;
-      bool matchesReimbursement = true; // 默认为 true，适用于 '全部' 选项
-
-      if (_selectedReimbursement == '已报销') {
-        matchesReimbursement = item.baoxiao == true;
-      } else if (_selectedReimbursement == '未报销') {
-        matchesReimbursement = item.baoxiao == false;
-      }
-
-      return matchesType && matchesAmount && matchesReimbursement;
-    }).toList();
-
-    setState(() {});
-  }
 
   Widget _buildFilters_Select() {
     return Container(
-      padding: EdgeInsets.all(10), // 增加外边距
+      padding: EdgeInsets.all(12), // 增加外边距
       child: Column(
         // 纵向布局，将两个部分分开
         children: [
@@ -700,7 +737,7 @@ class _HomePageState extends State<HomePage> {
                       child: Text(
                         '类型', // 标签文本
                         style: TextStyle(
-                          fontSize: 16, // 字体大小
+                          fontSize: 18, // 字体大小
                           fontWeight: FontWeight.bold, // 字体加粗
                           color: Colors.black, // 字体颜色
                         ),
@@ -726,7 +763,7 @@ class _HomePageState extends State<HomePage> {
                       child: Text(
                         '是否报销', // 标签文本
                         style: TextStyle(
-                          fontSize: 16, // 字体大小
+                          fontSize: 18, // 字体大小
                           fontWeight: FontWeight.bold, // 字体加粗
                           color: Colors.black, // 字体颜色
                         ),
@@ -766,14 +803,14 @@ class _HomePageState extends State<HomePage> {
       case 0:
         content.addAll([
           _buildSearchBox(),
-          ...mockFinanceData
+          ...financeItems
               .map((item) =>
               _buildFinanceItem(
-                item.title,
-                item.context,
-                item.amount,
-                item.Date,
-                item.baoxiao,
+                item.name,
+                item.typeString,
+                item.cost,
+                item.formattedCreatedAt, // 使用格式化后的日期时间
+                item.state,
               ))
               .toList(), // 使用扩展运算符...来正确展开列表
         ]);
@@ -784,16 +821,16 @@ class _HomePageState extends State<HomePage> {
       case 2:
         content.addAll([
           _buildFilters_Select(),
-          ..._filteredFinanceData
+          ...financeItems
               .map((item) =>
               _buildFinanceItem(
-                item.title,
-                item.context,
-                item.amount,
-                item.Date,
-                item.baoxiao,
+                item.name,
+                item.typeString,
+                item.cost,
+                item.formattedCreatedAt, // 使用格式化后的日期时间
+                item.state,
               ))
-              .toList(),
+              .toList(), // 使用扩展运算符...来正确展开列表
         ]);
         break;
     }
@@ -814,6 +851,63 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+//账单上传
+  void billUpLoad() async {
+    String name = _nameController.text;
+    int? category = _selectedCategory_lr ;
+    int amount;
+    if (category == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('请选择一个类别')),
+      );
+      return;
+    }
+    try {
+      amount = int.parse(_amountController.text);
+      bool success = await _dioClient.billUpLoad(category, amount,name );
+      if (success) {
+        // 处理上传成功的逻辑
+        print('账单上传成功');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('账单上传成功')),
+        );
+      } else {
+        // 处理上传失败的逻辑
+        print('账单上传失败');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('账单上传失败')),
+        );
+      }
+    } catch (e) {
+      // 处理异常
+      print('上传过程中发生异常: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('上传过程中发生异常')),
+      );
+    }
+  }
+
+//获取账单
+  Future<void> fetchFinanceData() async {
+    try {
+      final List<FinanceItem> fetchedItems = await _dioClient.fetchFinanceData();
+      setState(() {
+        financeItems = fetchedItems;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching finance data: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void handleRefresh() {
+    if (_contentMode == 0) {
+      fetchFinanceData();
+    }
+  }
 
 
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'savelingpai.dart';
-import 'dio_client.dart';
+import 'services/dio_client.dart';
 import 'package:dio/dio.dart';
 
 class AuthService {

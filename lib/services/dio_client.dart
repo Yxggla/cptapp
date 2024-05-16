@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
-import 'savelingpai.dart';  // 导入令牌保存和获取的类
+import 'package:cptapp/savelingpai.dart';  // 导入令牌保存和获取的类
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cptapp/classdata.dart';
+import 'package:cptapp/models/finance_item.dart';
 
 class DioClient {
   Dio _dio = Dio(BaseOptions(
@@ -53,8 +54,6 @@ class DioClient {
   Future<String?> getUsername() async {
     try {
       var response = await _dio.get('/user/get'); //
-      print("HTTP Status Code: ${response.statusCode}"); // 打印状态码
-      print("Response data: ${response.data}"); // 打印响应体内容
       if (response.statusCode == 200) {
         var username = response
             .data['data']['username']; // 假设用户名存储在响应的 'username' 字段
@@ -115,22 +114,48 @@ class DioClient {
     }
   }
 
-  //获取账单
-  Future<List<FinanceItem>> fetchFinanceData() async {
-    try {
-      var response = await _dio.get('/bill/getBills');
-      if (response.statusCode == 200) {
-        List<FinanceItem> financeItems = (response.data['data'] as List)
-            .map((item) => FinanceItem.fromJson(item))
-            .toList();
-        return financeItems;
-      }
-      return [];
-    } catch (e) {
-      print('获取财务数据异常: $e');
-      return [];
-    }
-  }
+  // //获取账单
+  // Future<List<FinanceItem>> fetchFinanceData({
+  //   int? type,
+  //   int? state,
+  //   int? minCost,
+  //   int? maxCost,
+  //   int? pageSize,
+  //   int? pageNum,
+  // }) async {
+  //   try {
+  //     // 打印参数值
+  //     print('type: $type');
+  //     print('state: $state');
+  //     print('minCost: $minCost');
+  //     print('maxCost: $maxCost');
+  //     print('pageSize: $pageSize');
+  //     print('pageNum: $pageNum');
+  //
+  //     // 创建查询参数的Map，并仅在参数不为空时添加它们
+  //     Map<String, dynamic> queryParams = {};
+  //     if (type != null) queryParams['type'] = type;
+  //     if (state != null) queryParams['state'] = state;
+  //     if (minCost != null) queryParams['minCost'] = minCost;
+  //     if (maxCost != null) queryParams['maxCost'] = maxCost;
+  //     if (pageSize != null) queryParams['pageSize'] = pageSize;
+  //     if (pageNum != null) queryParams['pageNum'] = pageNum;
+  //
+  //     var response = await _dio.get('/bill/getBills', queryParameters: queryParams);
+  //     if (response.statusCode == 200) {
+  //       List<FinanceItem> financeItems = (response.data['data'] as List)
+  //           .map((item) => FinanceItem.fromJson(item))
+  //           .toList();
+  //       return financeItems;
+  //     }
+  //     return [];
+  //   } catch (e) {
+  //     print('获取财务数据异常: $e');
+  //     return [];
+  //   }
+  // }
+
+
 }
 
 

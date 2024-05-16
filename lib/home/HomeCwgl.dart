@@ -9,10 +9,13 @@ import 'yusuanguanli/ysgl_main.dart';
 import 'yusuanguanli/ysgl_main_admin.dart';
 import 'baobiaoshengcheng/bbsc_main.dart';
 import 'package:dio/dio.dart';
-import 'package:cptapp/dio_client.dart';
+import 'package:cptapp/services/dio_client.dart';
 import 'package:cptapp/providerGL.dart';
 import 'package:provider/provider.dart';
 import 'user/UserPage.dart';
+import 'package:cptapp/models/finance_item.dart';
+import 'package:cptapp/services/finance_service.dart';
+import 'package:cptapp/models/finance_request.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -21,6 +24,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late DioClient dioClient;
+  late FinanceService financeService;
   bool _isSearching = false;
   bool isLoading = true;
   final FocusNode _focusNode = FocusNode();
@@ -41,10 +46,25 @@ class _HomePageState extends State<HomePage> {
   String? username;
   DioClient _dioClient = DioClient();
   int? _selectedCategory_lr; //录入时的选择的类别索引
-  int? _selectedBXIndex;  // 分类中保存选择的是否报销索引
-  int? _selectedCategory_fl; //分类中保存选择的类型索引
-
-
+  int? _selectedBXIndex=0;  // 分类中保存选择的是否报销索引
+  int? _selectedCategory_fl=0; //分类中保存选择的类型索引
+  FinanceRequest requestALL = FinanceRequest(
+    type: null,
+    state: null,
+    minCost: null,
+    maxCost: null,
+    pageSize: null,
+    pageNum: null,
+  );
+  //定义类
+  FinanceRequest requestSelect = FinanceRequest(
+    type: null,
+    state: null,
+    minCost: null,
+    maxCost: null,
+    pageSize: null,
+    pageNum: null,
+  );
 
   @override
   void dispose() {
@@ -52,6 +72,11 @@ class _HomePageState extends State<HomePage> {
     _maxAmountController.dispose();
     super.dispose();
   }
+  void initializeServices() async {
+    dioClient = DioClient();
+    financeService = FinanceService(dioClient);
+  }
+
 
   @override
   void initState() {
@@ -59,8 +84,35 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<UserNotifier>(context, listen: false).fetchUsername();
     });
-    fetchFinanceData();
+    initializeServices();
+    fetchFinanceData(requestALL);
+    addListeners();
   }
+  void addListeners() {
+    _minAmountController.addListener(() => updateRequest('minCost', _minAmountController.text));
+    _maxAmountController.addListener(() => updateRequest('maxCost', _maxAmountController.text));
+  }
+
+  void updateRequest(String field, String value) {
+    int? intValue = value.isEmpty ? null : int.tryParse(value);
+    switch (field) {
+      case 'type':
+        requestSelect = requestSelect.copyWith(type: intValue);
+        break;
+      case 'state':
+        requestSelect = requestSelect.copyWith(state: intValue);
+        break;
+      case 'minCost':
+        requestSelect = requestSelect.copyWith(minCost: intValue);
+        break;
+      case 'maxCost':
+        requestSelect = requestSelect.copyWith(maxCost: intValue);
+        break;
+    }
+    print("Fetching data with new request: ${requestSelect.toJson()}");
+    fetchFinanceData(requestSelect);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -603,6 +655,9 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             _selectedCategory_fl = newIndex;
           });
+          if (_selectedCategory_fl != null) {
+            updateRequest('type', (_selectedCategory_fl! - 1).toString());
+          }
         },
         items: filterOptions.asMap().entries.map<DropdownMenuItem<int>>((entry) {
           int idx = entry.key;
@@ -650,6 +705,9 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _selectedBXIndex = newIndex;
             });
+            if (_selectedBXIndex != null) {
+              updateRequest('state', (_selectedBXIndex! - 1).toString());
+            }
           },
           items: reimbursementOptions.asMap().entries.map<DropdownMenuItem<int>>((entry) {
             int idx = entry.key;
@@ -887,10 +945,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-//获取账单
-  Future<void> fetchFinanceData() async {
+  //获取账单
+  Future<void> fetchFinanceData(FinanceRequest request) async {
     try {
-      final List<FinanceItem> fetchedItems = await _dioClient.fetchFinanceData();
+      final List<FinanceItem> fetchedItems = await financeService.fetchFinanceData(request);
       setState(() {
         financeItems = fetchedItems;
         isLoading = false;
@@ -903,11 +961,17 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+
   void handleRefresh() {
     if (_contentMode == 0) {
-      fetchFinanceData();
+      fetchFinanceData(requestALL);
+    }
+    if (_contentMode == 2) {
+      fetchFinanceData(requestSelect);
     }
   }
+
+
 
 
 }

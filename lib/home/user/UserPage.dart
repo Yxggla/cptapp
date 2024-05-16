@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cptapp/providerGL.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
-import 'package:cptapp/dio_client.dart';
+import 'package:cptapp/services/dio_client.dart';
 
 class UserPagePage extends StatefulWidget {
   const UserPagePage({Key? key}) : super(key: key);

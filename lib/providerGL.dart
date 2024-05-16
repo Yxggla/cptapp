@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dio_client.dart'; // 确保导入DioClient类
+import 'services/dio_client.dart'; // 确保导入DioClient类
 
 class UserNotifier extends ChangeNotifier {
   String? _username;

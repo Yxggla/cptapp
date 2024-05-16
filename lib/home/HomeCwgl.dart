@@ -18,7 +18,6 @@ import 'package:cptapp/services/finance_service.dart';
 import 'package:cptapp/models/finance_request.dart';
 
 class HomePage extends StatefulWidget {
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -37,17 +36,33 @@ class _HomePageState extends State<HomePage> {
   TextEditingController _maxAmountController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
-  List<String> filterOptions = ['全部','住宿', '餐饮', '出行', '应酬','采购','团建','电话费'];
+  List<String> filterOptions = [
+    '全部',
+    '住宿',
+    '餐饮',
+    '出行',
+    '应酬',
+    '采购',
+    '团建',
+    '电话费'
+  ];
   String _selectedReimbursement = '';
-  final List<String> _categories = ['住宿', '餐饮', '出行', '应酬','采购','团建']; // 可选的类别列表
+  final List<String> _categories = [
+    '住宿',
+    '餐饮',
+    '出行',
+    '应酬',
+    '采购',
+    '团建'
+  ]; // 可选的类别列表
   int _selectedIndex_bottom = 0;
   final List<String> _titles = ['财务管理', '预算管理', '报表生成', '我的信息'];
-  final List<String> reimbursementOptions = ['全部', '已报销', '未报销', '审核中'];
+  final List<String> reimbursementOptions = ['全部', '未通过', '已报销', '审核中'];
   String? username;
   DioClient _dioClient = DioClient();
   int? _selectedCategory_lr; //录入时的选择的类别索引
-  int? _selectedBXIndex=0;  // 分类中保存选择的是否报销索引
-  int? _selectedCategory_fl=0; //分类中保存选择的类型索引
+  int? _selectedBXIndex = 0; // 分类中保存选择的是否报销索引
+  int? _selectedCategory_fl = 0; //分类中保存选择的类型索引
   FinanceRequest requestALL = FinanceRequest(
     type: null,
     state: null,
@@ -56,6 +71,7 @@ class _HomePageState extends State<HomePage> {
     pageSize: null,
     pageNum: null,
   );
+
   //定义类
   FinanceRequest requestSelect = FinanceRequest(
     type: null,
@@ -72,11 +88,11 @@ class _HomePageState extends State<HomePage> {
     _maxAmountController.dispose();
     super.dispose();
   }
+
   void initializeServices() async {
     dioClient = DioClient();
     financeService = FinanceService(dioClient);
   }
-
 
   @override
   void initState() {
@@ -88,9 +104,12 @@ class _HomePageState extends State<HomePage> {
     fetchFinanceData(requestALL);
     addListeners();
   }
+
   void addListeners() {
-    _minAmountController.addListener(() => updateRequest('minCost', _minAmountController.text));
-    _maxAmountController.addListener(() => updateRequest('maxCost', _maxAmountController.text));
+    _minAmountController
+        .addListener(() => updateRequest('minCost', _minAmountController.text));
+    _maxAmountController
+        .addListener(() => updateRequest('maxCost', _maxAmountController.text));
   }
 
   void updateRequest(String field, String value) {
@@ -113,139 +132,144 @@ class _HomePageState extends State<HomePage> {
     fetchFinanceData(requestSelect);
   }
 
-
   @override
   Widget build(BuildContext context) {
     final username = Provider.of<UserNotifier>(context).username;
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              _titles[_selectedIndex_bottom],
-              style: TextStyle(color: Colors.black, fontSize: 22),
-            ),
-          ],
-        ),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        leading: Builder(
-          // 使用Builder来获得正确的context
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, color: Colors.grey),
-            onPressed: () =>
-                Scaffold.of(context).openDrawer(), // 现在使用的是正确的context
-          ),
-        ),
-        actions: <Widget>[
-          CircleAvatar(
-            backgroundColor: Colors.blue,
-          ),
-          SizedBox(width: 20),
-        ],
-      ),
-      drawer: ClipRRect(
-        borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
-        // 设置右上和右下角的圆角
-        child: Drawer(
-          backgroundColor: Colors.blue,
-          child: ListView(
-            padding: EdgeInsets.zero,
+    return GestureDetector(
+      onTap: () {
+        // 调用这个方法后，当前活跃的焦点（这里指的是文本框）会失去焦点，
+        // 并关闭软键盘
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      width: double.infinity,
-                      height: 80, // 设置图片的高度
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(
-                              "img/MyHomePage/logo1@3x.png"), // 使用 AssetImage
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      '$username',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                      ),
-                    ),
-                  ],
-                ),
+              Text(
+                _titles[_selectedIndex_bottom],
+                style: TextStyle(color: Colors.black, fontSize: 22),
               ),
-              SizedBox(height: 50),
-              _buildDrawerItem(Icons.account_balance, '财务管理', context, () {
-                Navigator.pop(context); // 先关闭抽屉
-              }),
-              _buildDrawerItem(Icons.account_balance_wallet, '预算管理', context,
-                  () {
-                Navigator.pop(context); // 先关闭抽屉
-                _onItemTapped(1);
-              }),
-              _buildDrawerItem(Icons.assignment, '报表生成', context, () {
-                Navigator.pop(context); // 先关闭抽屉
-                _onItemTapped(2); // 然后跳转到预算管理页面
-              }),
-              _buildDrawerItem(Icons.settings, '我的信息', context, () {
-                Navigator.pop(context); // 先关闭抽屉
-                _onItemTapped(3);
-              }),
-
-              // 添加更多的列表项...
             ],
           ),
+          elevation: 0,
+          backgroundColor: Colors.white,
+          leading: Builder(
+            // 使用Builder来获得正确的context
+            builder: (context) => IconButton(
+              icon: Icon(Icons.menu, color: Colors.grey),
+              onPressed: () =>
+                  Scaffold.of(context).openDrawer(), // 现在使用的是正确的context
+            ),
+          ),
+          actions: <Widget>[
+            CircleAvatar(
+              backgroundColor: Colors.blue,
+            ),
+            SizedBox(width: 20),
+          ],
         ),
-      ),
-      body: _buildSelectedPage_Body(),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance),
-            label: '财务管理',
+        drawer: ClipRRect(
+          borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
+          // 设置右上和右下角的圆角
+          child: Drawer(
+            backgroundColor: Colors.blue,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        width: double.infinity,
+                        height: 80, // 设置图片的高度
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage(
+                                "img/MyHomePage/logo1@3x.png"), // 使用 AssetImage
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        '$username',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 50),
+                _buildDrawerItem(Icons.account_balance, '财务管理', context, () {
+                  Navigator.pop(context); // 先关闭抽屉
+                }),
+                _buildDrawerItem(Icons.account_balance_wallet, '预算管理', context,
+                    () {
+                  Navigator.pop(context); // 先关闭抽屉
+                  _onItemTapped(1);
+                }),
+                _buildDrawerItem(Icons.assignment, '报表生成', context, () {
+                  Navigator.pop(context); // 先关闭抽屉
+                  _onItemTapped(2); // 然后跳转到预算管理页面
+                }),
+                _buildDrawerItem(Icons.settings, '我的信息', context, () {
+                  Navigator.pop(context); // 先关闭抽屉
+                  _onItemTapped(3);
+                }),
+
+                // 添加更多的列表项...
+              ],
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            // 使用摄像头图标代表 "扫一扫"
-            label: '预算管理',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment),
-            label: '报表生成',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '我的信息',
-          ),
-        ],
-        backgroundColor: Colors.white,
-        type: BottomNavigationBarType.fixed,
-        // 当有四个以上的项时需要设置为 fixed
-        selectedItemColor: Colors.blue,
-        // 设置选中项的颜色
-        unselectedItemColor: Colors.black,
-        // 设置未选中项的颜色
-        showUnselectedLabels: true, // 是否显示未选中项的标签
-        currentIndex: _selectedIndex_bottom,
-        onTap: _onItemTapped,
-        // 此处你可以添加逻辑以处理点击事件
+        ),
+        body: _buildSelectedPage_Body(),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_balance),
+              label: '财务管理',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_balance_wallet),
+              // 使用摄像头图标代表 "扫一扫"
+              label: '预算管理',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.assignment),
+              label: '报表生成',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: '我的信息',
+            ),
+          ],
+          backgroundColor: Colors.white,
+          type: BottomNavigationBarType.fixed,
+          // 当有四个以上的项时需要设置为 fixed
+          selectedItemColor: Colors.blue,
+          // 设置选中项的颜色
+          unselectedItemColor: Colors.black,
+          // 设置未选中项的颜色
+          showUnselectedLabels: true,
+          // 是否显示未选中项的标签
+          currentIndex: _selectedIndex_bottom,
+          onTap: _onItemTapped,
+          // 此处你可以添加逻辑以处理点击事件
+        ),
       ),
     );
   }
 
-
-
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex_bottom = index;  // 更新选中的索引，并触发页面重建
+      _selectedIndex_bottom = index; // 更新选中的索引，并触发页面重建
     });
   }
 
@@ -360,8 +384,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildFinanceItem(
-      String name, String typeString, int cost, String formattedCreatedAt, BaoxiaoState state) {
+  Widget _buildFinanceItem(String name, String typeString, int cost,
+      String formattedCreatedAt, BaoxiaoState state) {
     return Container(
         margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
         // 外边距，为容器与其他元素提供间隔
@@ -406,31 +430,30 @@ class _HomePageState extends State<HomePage> {
                 state == 1
                     ? Icons.check_circle
                     : state == 2
-                    ? Icons.hourglass_empty
-                    : Icons.cancel, // 根据baoxiao变量选择图标
+                        ? Icons.hourglass_empty
+                        : Icons.cancel, // 根据baoxiao变量选择图标
                 color: state == 1
                     ? Colors.green
                     : state == 2
-                    ? Colors.orange
-                    : Colors.red, // 根据baoxiao变量选择颜色
+                        ? Colors.orange
+                        : Colors.red, // 根据baoxiao变量选择颜色
               ),
               Text(
                 state == 1
                     ? '已报销'
                     : state == 2
-                    ? '审核中'
-                    : '未通过', // 根据baoxiao变量选择文本
+                        ? '审核中'
+                        : '未通过', // 根据baoxiao变量选择文本
                 style: TextStyle(
                   color: state == 1
                       ? Colors.green
                       : state == 2
-                      ? Colors.orange
-                      : Colors.red,
+                          ? Colors.orange
+                          : Colors.red,
                   // 根据baoxiao变量选择文本颜色
                   fontSize: 14,
                 ),
               ),
-
             ],
           ),
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -487,18 +510,21 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           SizedBox(height: 8),
-          _buildTextField("名称",_nameController),
+          _buildTextField("名称", _nameController),
           _buildTextField_LeiBie("类别"), // 重构的文本输入框
-          _buildTextField("金额",_amountController),
+          _buildTextField("金额", _amountController),
           SizedBox(height: 20),
           Padding(
             padding: EdgeInsets.only(left: 45, right: 45, top: 10, bottom: 20),
-            child:ElevatedButton(
+            child: ElevatedButton(
               onPressed: billUpLoad,
-              child: Text("上传",style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+              child: Text(
+                "上传",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
+                  (Set<MaterialState> states) {
                     if (states.contains(MaterialState.pressed))
                       return Colors.blue.shade900; // 按钮被按下时的深蓝色
                     return Colors.blue; // 默认颜色
@@ -510,9 +536,9 @@ class _HomePageState extends State<HomePage> {
                 // 提升的阴影效果
                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0), // 设置按钮的圆角更圆滑
-                      side: BorderSide(color: Colors.blue.shade700), // 设置边框颜色稍深
-                    )),
+                  borderRadius: BorderRadius.circular(20.0), // 设置按钮的圆角更圆滑
+                  side: BorderSide(color: Colors.blue.shade700), // 设置边框颜色稍深
+                )),
                 padding: MaterialStateProperty.all(
                     EdgeInsets.symmetric(vertical: 16, horizontal: 100)),
                 // 调整内边距
@@ -521,13 +547,12 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-
         ],
       ),
     );
   }
 
-  Widget _buildTextField(String label,TextEditingController controller) {
+  Widget _buildTextField(String label, TextEditingController controller) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 4.0),
       padding: EdgeInsets.only(bottom: 10), // 在每个文本输入框下方增加间距
@@ -606,13 +631,17 @@ class _HomePageState extends State<HomePage> {
                       _selectedCategory_lr = newIndex;
                     });
                   },
-                  items: _categories.asMap().entries.map<DropdownMenuItem<int>>((entry) {
+                  items: _categories
+                      .asMap()
+                      .entries
+                      .map<DropdownMenuItem<int>>((entry) {
                     int idx = entry.key;
                     String val = entry.value;
                     return DropdownMenuItem<int>(
                       value: idx,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         decoration: BoxDecoration(
                           color: Colors.white,
                         ),
@@ -648,39 +677,40 @@ class _HomePageState extends State<HomePage> {
       child: DropdownButtonHideUnderline(
         // Hide the default underline of a dropdown
         child: DropdownButton<int>(
-        value: _selectedCategory_fl,
-        icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
-        // 下拉图标和颜色
-        onChanged: (int? newIndex) {
-          setState(() {
-            _selectedCategory_fl = newIndex;
-          });
-          if (_selectedCategory_fl != null) {
-            updateRequest('type', (_selectedCategory_fl! - 1).toString());
-          }
-        },
-        items: filterOptions.asMap().entries.map<DropdownMenuItem<int>>((entry) {
-          int idx = entry.key;
-          String val = entry.value;
-          return DropdownMenuItem<int>(
-            value: idx,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
+          value: _selectedCategory_fl,
+          icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
+          // 下拉图标和颜色
+          onChanged: (int? newIndex) {
+            setState(() {
+              _selectedCategory_fl = newIndex;
+            });
+            if (_selectedCategory_fl != null) {
+              updateRequest('type', (_selectedCategory_fl! - 1).toString());
+            }
+          },
+          items:
+              filterOptions.asMap().entries.map<DropdownMenuItem<int>>((entry) {
+            int idx = entry.key;
+            String val = entry.value;
+            return DropdownMenuItem<int>(
+              value: idx,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                ),
+                child: Text(val),
               ),
-              child: Text(val),
-            ),
-          );
-        }).toList(),
-        dropdownColor: Colors.white,
-        // 下拉菜单背景颜色
-        borderRadius: BorderRadius.circular(16),
-        // 下拉菜单的圆角
-        elevation: 5,
-        // 下拉菜单阴影的高度
-        style: TextStyle(color: Colors.black87, fontSize: 16), // 文本样式
-      ),
+            );
+          }).toList(),
+          dropdownColor: Colors.white,
+          // 下拉菜单背景颜色
+          borderRadius: BorderRadius.circular(16),
+          // 下拉菜单的圆角
+          elevation: 5,
+          // 下拉菜单阴影的高度
+          style: TextStyle(color: Colors.black87, fontSize: 16), // 文本样式
+        ),
       ),
     );
   }
@@ -697,10 +727,9 @@ class _HomePageState extends State<HomePage> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: _selectedBXIndex,
-          icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
+          icon: Icon(Icons.arrow_drop_down, color: Colors.grey),
           iconSize: 24,
           elevation: 12,
-          style: TextStyle(color: Colors.blue, fontSize: 16),
           onChanged: (int? newIndex) {
             setState(() {
               _selectedBXIndex = newIndex;
@@ -709,7 +738,10 @@ class _HomePageState extends State<HomePage> {
               updateRequest('state', (_selectedBXIndex! - 1).toString());
             }
           },
-          items: reimbursementOptions.asMap().entries.map<DropdownMenuItem<int>>((entry) {
+          items: reimbursementOptions
+              .asMap()
+              .entries
+              .map<DropdownMenuItem<int>>((entry) {
             int idx = entry.key;
             String val = entry.value;
             return DropdownMenuItem<int>(
@@ -774,8 +806,6 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
-
-
 
   Widget _buildFilters_Select() {
     return Container(
@@ -862,14 +892,13 @@ class _HomePageState extends State<HomePage> {
         content.addAll([
           _buildSearchBox(),
           ...financeItems
-              .map((item) =>
-              _buildFinanceItem(
-                item.name,
-                item.typeString,
-                item.cost,
-                item.formattedCreatedAt, // 使用格式化后的日期时间
-                item.state,
-              ))
+              .map((item) => _buildFinanceItem(
+                    item.name,
+                    item.typeString,
+                    item.cost,
+                    item.formattedCreatedAt, // 使用格式化后的日期时间
+                    item.state,
+                  ))
               .toList(), // 使用扩展运算符...来正确展开列表
         ]);
         break;
@@ -880,14 +909,13 @@ class _HomePageState extends State<HomePage> {
         content.addAll([
           _buildFilters_Select(),
           ...financeItems
-              .map((item) =>
-              _buildFinanceItem(
-                item.name,
-                item.typeString,
-                item.cost,
-                item.formattedCreatedAt, // 使用格式化后的日期时间
-                item.state,
-              ))
+              .map((item) => _buildFinanceItem(
+                    item.name,
+                    item.typeString,
+                    item.cost,
+                    item.formattedCreatedAt, // 使用格式化后的日期时间
+                    item.state,
+                  ))
               .toList(), // 使用扩展运算符...来正确展开列表
         ]);
         break;
@@ -895,15 +923,14 @@ class _HomePageState extends State<HomePage> {
     return ListView(children: content);
   }
 
-  Widget _buildSelectedPage_Body()
-  {
+  Widget _buildSelectedPage_Body() {
     switch (_selectedIndex_bottom) {
       case 0:
         return _buildContentForIndex0();
       case 1:
-        return ysgl_mainPage();  // 你提到的另一个页面的Widget
+        return ysgl_mainPage(); // 你提到的另一个页面的Widget
       case 2:
-        return bbsc_mainPage();  // 假设是报表生成的页面
+        return bbsc_mainPage(); // 假设是报表生成的页面
       default:
         return UserPagePage();
     }
@@ -912,7 +939,7 @@ class _HomePageState extends State<HomePage> {
 //账单上传
   void billUpLoad() async {
     String name = _nameController.text;
-    int? category = _selectedCategory_lr ;
+    int? category = _selectedCategory_lr;
     int amount;
     if (category == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -922,7 +949,7 @@ class _HomePageState extends State<HomePage> {
     }
     try {
       amount = int.parse(_amountController.text);
-      bool success = await _dioClient.billUpLoad(category, amount,name );
+      bool success = await _dioClient.billUpLoad(category, amount, name);
       if (success) {
         // 处理上传成功的逻辑
         print('账单上传成功');
@@ -948,7 +975,8 @@ class _HomePageState extends State<HomePage> {
   //获取账单
   Future<void> fetchFinanceData(FinanceRequest request) async {
     try {
-      final List<FinanceItem> fetchedItems = await financeService.fetchFinanceData(request);
+      final List<FinanceItem> fetchedItems =
+          await financeService.fetchFinanceData(request);
       setState(() {
         financeItems = fetchedItems;
         isLoading = false;
@@ -961,7 +989,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
   void handleRefresh() {
     if (_contentMode == 0) {
       fetchFinanceData(requestALL);
@@ -970,8 +997,4 @@ class _HomePageState extends State<HomePage> {
       fetchFinanceData(requestSelect);
     }
   }
-
-
-
-
 }

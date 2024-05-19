@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
     '团建'
   ]; // 可选的类别列表
   int _selectedIndex_bottom = 0;
-  final List<String> _titles = ['财务管理', '预算管理', '报表生成', '我的信息'];
+  final List<String> _titles = ['财务管理', '预算管理', '报表生成', '我的设置'];
   final List<String> reimbursementOptions = ['全部', '未通过', '已报销', '审核中'];
   String? username;
   DioClient _dioClient = DioClient();
@@ -219,7 +219,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.pop(context); // 先关闭抽屉
                   _onItemTapped(2); // 然后跳转到预算管理页面
                 }),
-                _buildDrawerItem(Icons.settings, '我的信息', context, () {
+                _buildDrawerItem(Icons.settings, '我的设置', context, () {
                   Navigator.pop(context); // 先关闭抽屉
                   _onItemTapped(3);
                 }),
@@ -247,7 +247,7 @@ class _HomePageState extends State<HomePage> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
-              label: '我的信息',
+              label: '我的设置',
             ),
           ],
           backgroundColor: Colors.white,
@@ -850,7 +850,7 @@ class _HomePageState extends State<HomePage> {
                     Padding(
                       padding: const EdgeInsets.only(left: 10, bottom: 5),
                       child: Text(
-                        '是否报销', // 标签文本
+                        '报销状态', // 标签文本
                         style: TextStyle(
                           fontSize: 18, // 字体大小
                           fontWeight: FontWeight.bold, // 字体加粗

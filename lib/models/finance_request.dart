@@ -23,6 +23,9 @@ class FinanceRequest {
     int? pageSize,
     int? pageNum,
   }) {
+    FinanceRequest res=FinanceRequest(
+
+    )
     return FinanceRequest(
       type: type ?? this.type,
       state: state ?? this.state,

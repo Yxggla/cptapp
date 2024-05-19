@@ -122,10 +122,10 @@ class _HomePageState extends State<HomePage> {
         requestSelect = requestSelect.copyWith(state: intValue);
         break;
       case 'minCost':
-        requestSelect = requestSelect.copyWith(minCost: intValue);
+        requestSelect.minCost=intValue;
         break;
       case 'maxCost':
-        requestSelect = requestSelect.copyWith(maxCost: intValue);
+        requestSelect.maxCost=intValue;
         break;
     }
     print("Fetching data with new request: ${requestSelect.toJson()}");

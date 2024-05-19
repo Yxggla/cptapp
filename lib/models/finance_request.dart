@@ -1,8 +1,8 @@
 class FinanceRequest {
   final int? type;
   final int? state;
-  final int? minCost;
-  final int? maxCost;
+  int? minCost;
+  int? maxCost;
   final int? pageSize;
   final int? pageNum;
 
@@ -25,7 +25,7 @@ class FinanceRequest {
   }) {
     FinanceRequest res=FinanceRequest(
 
-    )
+    );
     return FinanceRequest(
       type: type ?? this.type,
       state: state ?? this.state,

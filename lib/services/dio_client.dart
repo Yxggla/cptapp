@@ -114,6 +114,25 @@ class DioClient {
     }
   }
 
+
+  Future<bool> removeBills(int billId) async {
+    try {
+      // 封装 billId 到一个 Map 中，这取决于后端API的期望格式
+      var data = {'billId': billId};
+      var response = await _dio.post('/bill/revocation', data: data);
+      if (response.statusCode == 200) {
+        print('账单删除成功');
+        return true;
+      } else {
+        print('账单删除失败: ${response.data}');
+        return false;
+      }
+    } catch (e) {
+      print('账单删除异常: $e');
+      return false;
+    }
+  }
+
   // //获取账单
   // Future<List<FinanceItem>> fetchFinanceData({
   //   int? type,
@@ -159,45 +178,45 @@ class DioClient {
 }
 
 
-extension FinanceItemExtension on FinanceItem {
-  static FinanceItem fromJson(Map<String, dynamic> json) {
-    return FinanceItem(
-      id: json['id'] ?? 0,
-      createdAt: json['createdAt'] ?? '',
-      updatedAt: json['updatedAt'] ?? '',
-      deletedAt: json['deletedAt'] ?? '',
-      owner: json['owner'] ?? '',
-      type: json['type'] ?? 0,
-      name: json['name']  ?? '',
-      cost: json['cost'] ?? 0,
-      state: _baoxiaoStateFromInt(json['state']),
-    );
-  }
-
-  // 将整数转换为枚举类型
-  static BaoxiaoState _baoxiaoStateFromInt(int state) {
-    switch (state) {
-      case 0:
-        return BaoxiaoState.unapproved;
-      case 1:
-        return BaoxiaoState.approved;
-      case 2:
-        return BaoxiaoState.pending;
-      default:
-        throw ArgumentError('Unknown baoxiao state: $state');
-    }
-  }
-}
-
-
-extension UserItemExtension on UserItem {
-  static UserItem fromJson(Map<String, dynamic> json) {
-    return UserItem(
-      username: json['username'],
-      phone: json['phone'],
-    );
-  }
-}
+// extension FinanceItemExtension on FinanceItem {
+//   static FinanceItem fromJson(Map<String, dynamic> json) {
+//     return FinanceItem(
+//       id: json['id'] ?? 0,
+//       createdAt: json['createdAt'] ?? '',
+//       updatedAt: json['updatedAt'] ?? '',
+//       deletedAt: json['deletedAt'] ?? '',
+//       owner: json['owner'] ?? '',
+//       type: json['type'] ?? 0,
+//       name: json['name']  ?? '',
+//       cost: json['cost'] ?? 0,
+//       state: _baoxiaoStateFromInt(json['state']),
+//     );
+//   }
+//
+//   // 将整数转换为枚举类型
+//   static BaoxiaoState _baoxiaoStateFromInt(int state) {
+//     switch (state) {
+//       case 0:
+//         return BaoxiaoState.unapproved;
+//       case 1:
+//         return BaoxiaoState.approved;
+//       case 2:
+//         return BaoxiaoState.pending;
+//       default:
+//         throw ArgumentError('Unknown baoxiao state: $state');
+//     }
+//   }
+// }
+//
+//
+// extension UserItemExtension on UserItem {
+//   static UserItem fromJson(Map<String, dynamic> json) {
+//     return UserItem(
+//       username: json['username'],
+//       phone: json['phone'],
+//     );
+//   }
+// }
 
 
 

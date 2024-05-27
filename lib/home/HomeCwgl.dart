@@ -385,7 +385,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFinanceItem(String name, String typeString, int cost,
-      String formattedCreatedAt, BaoxiaoState state) {
+      String formattedCreatedAt, BaoxiaoState state,int id) {
     return Container(
         margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
         // 外边距，为容器与其他元素提供间隔
@@ -406,62 +406,94 @@ class _HomePageState extends State<HomePage> {
           leading: Icon(Icons.receipt, color: Colors.blue, size: 30),
           title: Text(
             '$name',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text('类型: $typeString', style: TextStyle(fontSize: 16)),
-              // 注意这里应该显示类型而不是重复标题
-              Text('金额: ¥$cost',
-                  style: TextStyle(fontSize: 16, color: Colors.green)),
-              Text('日期: $formattedCreatedAt',
-                  style: TextStyle(fontSize: 14, color: Colors.grey)),
+              Text('金额: ¥$cost', style: TextStyle(fontSize: 16, color: Colors.green)),
+              Text('日期: $formattedCreatedAt', style: TextStyle(fontSize: 14, color: Colors.grey)),
             ],
           ),
-          trailing: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(
-                state == 0
-                    ? Icons.cancel // 未通过
-                    : state == 1
-                    ? Icons.check_circle // 已报销
-                    : Icons.hourglass_empty, // 审核中，根据state变量选择图标
-                color: state == 0
-                    ? Colors.red // 未通过
-                    : state == 1
-                    ? Colors.green // 已报销
-                    : Colors.orange, // 审核中，根据state变量选择颜色
-              ),
-
-              Text(
-                state == 0
-                    ? '未通过'
-                    : state == 1
-                    ? '已报销'
-                    : '审核中', // 根据state变量选择文本
-                style: TextStyle(
-                  color: state == 0
-                      ? Colors.red
-                      : state == 1
-                      ? Colors.green
-                      : Colors.orange, // 根据state变量选择文本颜色
-                  fontSize: 14,
-                ),
-              ),
-
-            ],
-          ),
+          trailing: _buildStateIcon(state),
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          onTap: () {
-            // 点击事件
-          },
-        ));
+          onTap: () => _showFinanceDialog(context, name, typeString, cost, formattedCreatedAt, state, id),
+        ),
+    );
+  }
+
+  Widget _buildStateIcon(BaoxiaoState state) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(
+          state == 0 ? Icons.cancel :
+          state == 1 ? Icons.check_circle :
+          Icons.hourglass_empty,
+          color: state == 0 ? Colors.red :
+          state == 1 ? Colors.green :
+          Colors.orange,
+        ),
+        Text(
+          state == 0 ? '未通过' :
+          state == 1 ? '已报销' :
+          '审核中',
+          style: TextStyle(color: state == 0 ? Colors.red :
+          state == 1 ? Colors.green :
+          Colors.orange, fontSize: 14),
+        ),
+      ],
+    );
+  }
+
+  void _showFinanceDialog(BuildContext context, String name, String typeString, int cost, String formattedCreatedAt, BaoxiaoState state, int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("账单详情"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("名称: $name"),
+              Text("类型: $typeString"),
+              Text("金额: ¥$cost"),
+              Text("日期: $formattedCreatedAt"),
+              // 添加更多账单信息...
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text("删除"),
+              onPressed: () {
+                _deleteFinance(id);
+                Navigator.of(context).pop();  // 关闭对话框
+              },
+            ),
+            TextButton(
+              child: Text("关闭"),
+              onPressed: () {
+                Navigator.of(context).pop();  // 关闭对话框
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  void _deleteFinance(int id) async {
+    // 等待 removeBills 方法完成并获取结果
+    bool success = await _dioClient.removeBills(id);
+    print("Deleting finance record with id: $id");
+    // 检查是否删除成功
+    if (success) {
+      fetchFinanceData(requestSelect);//可能有问题
+    }
   }
 
   Widget _buildLuru() {
@@ -899,6 +931,7 @@ class _HomePageState extends State<HomePage> {
                     item.cost,
                     item.formattedCreatedAt, // 使用格式化后的日期时间
                     item.state,
+                    item.id,
                   ))
               .toList(), // 使用扩展运算符...来正确展开列表
         ]);
@@ -916,6 +949,7 @@ class _HomePageState extends State<HomePage> {
                     item.cost,
                     item.formattedCreatedAt, // 使用格式化后的日期时间
                     item.state,
+                    item.id,
                   ))
               .toList(), // 使用扩展运算符...来正确展开列表
         ]);

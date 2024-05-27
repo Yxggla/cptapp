@@ -18,14 +18,6 @@ class _UserPagePageState extends State<UserPagePage> {
   final TextEditingController _newPasswordController = TextEditingController();
   DioClient _dioClient = DioClient();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     Provider.of<UserNotifier>(context, listen: false).fetchUsername();
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

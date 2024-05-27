@@ -388,12 +388,10 @@ class _HomePageState extends State<HomePage> {
       String formattedCreatedAt, BaoxiaoState state,int id) {
     return Container(
         margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-        // 外边距，为容器与其他元素提供间隔
         decoration: BoxDecoration(
           color: Colors.white, // 背景色
           borderRadius: BorderRadius.circular(16), // 圆角
           boxShadow: [
-            // 阴影效果
             BoxShadow(
               color: Colors.grey.withOpacity(0.5), // 阴影颜色
               spreadRadius: 2, // 阴影扩展程度
@@ -451,50 +449,144 @@ class _HomePageState extends State<HomePage> {
   void _showFinanceDialog(BuildContext context, String name, String typeString, int cost, String formattedCreatedAt, BaoxiaoState state, int id) {
     showDialog(
       context: context,
+      barrierDismissible: false, // 点击对话框外部不关闭对话框
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("账单详情"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("名称: $name"),
-              Text("类型: $typeString"),
-              Text("金额: ¥$cost"),
-              Text("日期: $formattedCreatedAt"),
-              // 添加更多账单信息...
-            ],
+        return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: ModalRoute.of(context)!.animation!,
+            curve: Curves.easeInOut,
           ),
-          actions: [
-            TextButton(
-              child: Text("删除"),
-              onPressed: () {
-                _deleteFinance(id);
-                Navigator.of(context).pop();  // 关闭对话框
-              },
+          child: Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+            elevation: 16,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue[200]!, Colors.blue[500]!],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black45,
+                    offset: Offset(0, 4),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text("账单详情", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                  SizedBox(height: 20),
+                  _infoTile(Icons.description, "名称", "  $name", Colors.white),
+                  _infoTile(Icons.filter_alt, "类型", "  $typeString", Colors.white),
+                  _infoTile(Icons.attach_money, "金额", "  $cost", Colors.white),
+                  _infoTile(Icons.date_range, "日期", "  $formattedCreatedAt", Colors.white),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _actionButton(context, "删除", Colors.red, () => _handleDelete(id)),
+                      _actionButton(context, "关闭", Colors.blueGrey[200]!, () {
+                        Navigator.of(context).pop(); // 关闭对话框
+                      }),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            TextButton(
-              child: Text("关闭"),
-              onPressed: () {
-                Navigator.of(context).pop();  // 关闭对话框
-              },
-            ),
-          ],
+          ),
         );
       },
     );
   }
 
+  Widget _infoTile(IconData icon, String label, String value, Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: <Widget>[
+          Icon(icon, color: textColor, size: 28),
+          SizedBox(width: 10),
+          Text(label + ":", style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 16)),
+          Expanded(child: Text(value, style: TextStyle(fontSize: 16, color: textColor))),
+        ],
+      ),
+    );
+  }
 
-  void _deleteFinance(int id) async {
-    // 等待 removeBills 方法完成并获取结果
-    bool success = await _dioClient.removeBills(id);
-    print("Deleting finance record with id: $id");
-    // 检查是否删除成功
-    if (success) {
-      fetchFinanceData(requestSelect);//可能有问题
+  Widget _actionButton(BuildContext context, String text, Color color, VoidCallback onPressed) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: color, // Background color
+        onPrimary: Colors.white, // Text color
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      ),
+      onPressed: onPressed,
+      child: Text(text, style: TextStyle(fontSize: 16)),
+    );
+  }
+
+  Future<bool> _deleteFinance(int id) async {
+    bool success = false;
+    try {
+      success = await _dioClient.removeBills(id);
+      print("Deleting finance record with id: $id");
+      if (success) {
+        // 刷新数据，根据当前的内容模式决定使用哪个请求对象
+        fetchFinanceData(_contentMode == 0 ? requestALL : requestSelect);
+      }
+    } catch (e) {
+      print("Error deleting finance record: $e");
+      success = false; // 确保在出现异常时返回失败状态
+    }
+    return success;
+  }
+
+  void _handleDelete(int id) async {
+    // 单次确认
+    bool confirm = await _showConfirmationDialog(context, "确认删除", "您确定要删除这条记录吗?");
+    if (confirm) {
+      // 执行删除操作
+      bool success = await _deleteFinance(id);
+      Navigator.of(context).pop(); // 关闭当前的详情或列表视图对话框
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('删除成功'), backgroundColor: Colors.blue));
+        // 如果需要，这里添加刷新数据的方法，例如重新加载列表
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('删除失败'), backgroundColor: Colors.red));
+      }
     }
   }
+  Future<bool> _showConfirmationDialog(BuildContext context, String title, String content) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // 用户必须点击按钮才能关闭对话框
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(title, style: TextStyle(color: Colors.blueAccent)),
+          content: Text(content),
+          actions: <Widget>[
+            TextButton(
+              child: Text("取消", style: TextStyle(color: Colors.grey)),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: Text("确认", style: TextStyle(color: Colors.red)),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    ) ?? false; // 防止返回 null
+  }
+
 
   Widget _buildLuru() {
     return Container(

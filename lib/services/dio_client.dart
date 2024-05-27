@@ -116,10 +116,12 @@ class DioClient {
 
 
   Future<bool> removeBills(int billId) async {
+    var formData = FormData.fromMap({
+      'billId': billId,
+    });
     try {
-      // 封装 billId 到一个 Map 中，这取决于后端API的期望格式
       var data = {'billId': billId};
-      var response = await _dio.post('/bill/revocation', data: data);
+      var response = await _dio.post('/bill/revocation', data: formData);
       if (response.statusCode == 200) {
         print('账单删除成功');
         return true;

@@ -482,10 +482,11 @@ class _HomePageState extends State<HomePage> {
                 children: <Widget>[
                   Text("账单详情", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                   SizedBox(height: 20),
-                  _infoTile(Icons.description, "名称", "  $name", Colors.white),
-                  _infoTile(Icons.filter_alt, "类型", "  $typeString", Colors.white),
-                  _infoTile(Icons.attach_money, "金额", "  $cost", Colors.white),
-                  _infoTile(Icons.date_range, "日期", "  $formattedCreatedAt", Colors.white),
+                  _infoTile(Icons.description, "名称", name, Colors.white),
+                  _infoTile(Icons.filter_alt, "类型", typeString, Colors.white),
+                  _infoTile(Icons.attach_money, "金额", "$cost", Colors.white),
+                  _infoTile(Icons.date_range, "日期", formattedCreatedAt, Colors.white),
+                  _infoTile(Icons.date_range, "报销流程", state.description, Colors.white),
                   SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -512,7 +513,7 @@ class _HomePageState extends State<HomePage> {
         children: <Widget>[
           Icon(icon, color: textColor, size: 28),
           SizedBox(width: 10),
-          Text(label + ":", style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 16)),
+          Text(label + ":  ", style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 16)),
           Expanded(child: Text(value, style: TextStyle(fontSize: 16, color: textColor))),
         ],
       ),

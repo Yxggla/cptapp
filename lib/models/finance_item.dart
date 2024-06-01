@@ -4,6 +4,20 @@ enum BaoxiaoState {
   approved,    // 已报销
   pending      // 审核中
 }
+extension BaoxiaoStateExtension on BaoxiaoState {
+  String get description {
+    switch (this) {
+      case BaoxiaoState.unapproved:
+        return "未通过";
+      case BaoxiaoState.approved:
+        return "已报销";
+      case BaoxiaoState.pending:
+        return "审核中";
+      default:
+        return '';
+    }
+  }
+}
 
 class FinanceItem {
   final int id;
@@ -84,5 +98,4 @@ class FinanceItem {
       return createdAt;
     }
   }
-
 }

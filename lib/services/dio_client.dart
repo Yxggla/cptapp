@@ -102,10 +102,8 @@ class DioClient {
     try {
       var response = await _dio.post('/bill/upload', data: formData);
       if (response.statusCode == 200) {
-        print('账单上传成功');
         return true;
       } else {
-        print('账单上传失败: ${response.data}');
         return false;
       }
     } catch (e) {

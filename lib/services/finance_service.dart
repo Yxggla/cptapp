@@ -19,6 +19,7 @@ class FinanceService {
         List<FinanceItem> financeItems = (response.data['data'] as List)
             .map((item) => FinanceItem.fromJson(item))
             .toList();
+        financeItems.sort((a, b) => DateTime.parse(b.createdAt).compareTo(DateTime.parse(a.createdAt)));
         return financeItems;
       }
       return [];

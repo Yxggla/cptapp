@@ -427,19 +427,19 @@ class _HomePageState extends State<HomePage> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Icon(
-          state == 0 ? Icons.cancel :
-          state == 1 ? Icons.check_circle :
+          state.description == '未通过' ? Icons.cancel :
+          state.description == '已报销' ? Icons.check_circle :
           Icons.hourglass_empty,
-          color: state == 0 ? Colors.red :
-          state == 1 ? Colors.green :
+          color: state.description == '未通过' ? Colors.red :
+          state.description == '已报销' ? Colors.green :
           Colors.orange,
         ),
         Text(
-          state == 0 ? '未通过' :
-          state == 1 ? '已报销' :
+          state.description == '未通过' ? '未通过' :
+          state.description == '已报销' ? '已报销' :
           '审核中',
-          style: TextStyle(color: state == 0 ? Colors.red :
-          state == 1 ? Colors.green :
+          style: TextStyle(color: state.description == '未通过' ? Colors.red :
+          state.description == '已报销' ? Colors.green :
           Colors.orange, fontSize: 14),
         ),
       ],

@@ -1075,6 +1075,19 @@ class _HomePageState extends State<HomePage> {
       );
       return;
     }
+    if (_nameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('请输入账单名')),
+      );
+      return;
+    }
+
+    if (_amountController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('请输入金额')),
+      );
+      return;
+    }
     try {
       amount = int.parse(_amountController.text);
       bool success = await _dioClient.billUpLoad(category, amount, name);

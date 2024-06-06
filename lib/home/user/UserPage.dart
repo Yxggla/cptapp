@@ -454,34 +454,74 @@ class _UserPagePageState extends State<UserPagePage> {
   }
 
   void _updateUsername() async {
-    bool updated = await _dioClient.updateUserInfo(
-        _passwordController.text, null, _newUsernameController.text);
-    if (updated) {
-      print('用户名已更新为: ${_newUsernameController.text}');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("用户名更新成功！")));
-      Provider.of<UserNotifier>(context, listen: false)
-          .setUsername(_newUsernameController.text);
-      _clear();
-    } else {
-      print('更新用户名失败');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("用户名更新失败！")));
+    if (_newUsernameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('请输入新用户名')),
+      );
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('请输入密码')),
+      );
+      return;
+    }
+    try{
+      bool updated = await _dioClient.updateUserInfo(
+          _passwordController.text, null, _newUsernameController.text);
+      if (updated) {
+        print('用户名已更新为: ${_newUsernameController.text}');
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("用户名更新成功！")));
+        Provider.of<UserNotifier>(context, listen: false)
+            .setUsername(_newUsernameController.text);
+        _clear();
+      } else {
+        print('更新用户名失败');
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("用户名更新失败！")));
+      }
+    }catch (e) {
+      // 处理异常
+      print('更新过程中发生异常: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('更新过程中发生异常')),
+      );
     }
   }
 
   void _updatePassword() async {
-    bool updated = await _dioClient.updateUserInfo(
-        _passwordController.text, _newPasswordController.text, null);
-    if (updated) {
-      print('密码已更新为: ${_newPasswordController.text}');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("密码更新成功！")));
-      _clear();
-    } else {
-      print('更新密码失败');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("密码更新失败！")));
+    if (_newPasswordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('请输入新密码')),
+      );
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('请输入密码')),
+      );
+      return;
+    }
+    try{
+      bool updated = await _dioClient.updateUserInfo(
+          _passwordController.text, _newPasswordController.text, null);
+      if (updated) {
+        print('密码已更新为: ${_newPasswordController.text}');
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("密码更新成功！")));
+        _clear();
+      } else {
+        print('更新密码失败');
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("密码更新失败！")));
+      }
+    }catch (e) {
+      // 处理异常
+      print('更新过程中发生异常: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('更新过程中发生异常')),
+      );
     }
   }
 

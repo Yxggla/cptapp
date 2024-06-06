@@ -151,6 +151,12 @@ class SignInPage extends StatelessWidget {
               Center(
                 child: ElevatedButton(
                   onPressed: () async {
+                    if (phoneController.text.isEmpty || passwordController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('请输入手机号或密码')),
+                      );
+                      return;
+                    }
                     bool isLoggedIn = await AuthService.login(
                       phoneController.text,
                       passwordController.text,

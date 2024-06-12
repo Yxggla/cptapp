@@ -491,6 +491,26 @@ class _UserPagePageState extends State<UserPagePage> {
   }
 
   void _updatePassword() async {
+    bool isValidPassword(String value) {
+      // 定义密码的正则表达式，至少8位，包含数字和字母
+      final RegExp regex = RegExp(r'^(?=.*\d)(?=.*[a-zA-Z])[\da-zA-Z]{8,16}$');
+
+      // 如果密码是123，直接返回true
+      if (value == "123") {
+        return true;
+      }
+
+      // 使用正则表达式匹配密码
+      return regex.hasMatch(value);
+    }
+
+    if (!isValidPassword(_newPasswordController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('密码格式不正确，请输入至少8位且包含数字和字母的密码')),
+      );
+      return;
+    }
+
     if (_newPasswordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('请输入新密码')),

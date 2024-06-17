@@ -16,6 +16,8 @@ import 'user/UserPage.dart';
 import 'package:cptapp/models/finance_item.dart';
 import 'package:cptapp/services/finance_service.dart';
 import 'package:cptapp/models/finance_request.dart';
+import 'package:characters/characters.dart';
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -36,6 +38,7 @@ class _HomePageState extends State<HomePage> {
   TextEditingController _maxAmountController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+  String Fitstcharacters_name = '';
   List<String> filterOptions = [
     '全部',
     '住宿',
@@ -98,11 +101,29 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserNotifier>(context, listen: false).fetchUsername();
+      Provider.of<UserNotifier>(context, listen: false).fetchUsername().then((_) {
+        setFitstcharacters_name();
+      });
     });
     initializeServices();
     fetchFinanceData(requestALL);
     addListeners();
+  }
+  void setFitstcharacters_name() {
+    final username = Provider.of<UserNotifier>(context, listen: false).username;
+
+    if (username != null && username.isNotEmpty) {
+      String firstChar = username.characters.first;
+      setState(() {
+        Fitstcharacters_name = RegExp(r'^[a-zA-Z]$').hasMatch(firstChar)
+            ? firstChar.toUpperCase()
+            : firstChar;
+      });
+    } else {
+      setState(() {
+        Fitstcharacters_name = '1';
+      });
+    }
   }
 
   void addListeners() {
@@ -134,7 +155,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final username = Provider.of<UserNotifier>(context).username;
+
     return GestureDetector(
       onTap: () {
         // 调用这个方法后，当前活跃的焦点（这里指的是文本框）会失去焦点，
@@ -162,11 +183,20 @@ class _HomePageState extends State<HomePage> {
                   Scaffold.of(context).openDrawer(), // 现在使用的是正确的context
             ),
           ),
-          actions: <Widget>[
+          actions:<Widget>[
+            // 创建CircleAvatar，使用Text显示首字母
             CircleAvatar(
               backgroundColor: Colors.blue,
+              child: Text(
+                Fitstcharacters_name,
+                style: TextStyle(
+                  color: Colors.white, // 字体颜色
+                  fontSize: 18, // 字体大小
+                  fontWeight: FontWeight.bold, // 字体加粗
+                ),
+              ),
             ),
-            SizedBox(width: 20),
+            SizedBox(width: 20), // 间距
           ],
         ),
         drawer: ClipRRect(
@@ -1138,4 +1168,5 @@ class _HomePageState extends State<HomePage> {
       fetchFinanceData(requestSelect);
     }
   }
+
 }

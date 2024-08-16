@@ -4,11 +4,16 @@
 
 问题描述：许多企业在进行财务资料整理时面临着繁琐复杂的问题，包括收据和发票管理、账单跟踪、报销管理等。
 
-
-
 In modern times, many enterprises are faced with the challenge of financial data consolidation, and the existing solutions are often inefficient. Therefore, I plan to develop a finance-related application called Caipiaotong, which aims to solve the difficulties and challenges in the process of organizing corporate financial data. 
  
 Problem description: Many enterprises are faced with cumbersome and complex problems when sorting out financial information, including receipt and invoice management, bill tracking, reimbursement management, etc.
+
+##  项目 / Project
+
+这个项目是我的软件工程课程的大作业。以小组的形式完成，我担任的是前端部分。
+
+
+This project is a big assignment for my software engineering class. It was done as a team, and I was the front end.
 
 
 ##  开始 / Getting Started
